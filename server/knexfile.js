@@ -1,16 +1,15 @@
 // server/knexfile.js
+require('dotenv').config(); // Make sure to load environment variables
+
 module.exports = {
   development: {
-    client: 'sqlite3',
-    connection: {
-      filename: './luminous_heaven.db3' // The name of our database file
-    },
-    useNullAsDefault: true, // Required for SQLite
+    client: 'pg', // Change client to 'pg'
+    connection: process.env.DATABASE_URL, // Use the environment variable
     migrations: {
-      directory: './data/migrations' // Where we will store schema changes
+      directory: './data/migrations'
     },
     seeds: {
-      directory: './data/seeds' // Where we will store initial data
+      directory: './data/seeds'
     }
   }
 };
