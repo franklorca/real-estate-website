@@ -25,7 +25,8 @@ const SignUpPage = () => {
     setSuccess('');
 
     try {
-      const response = await axios.post('http://localhost:5000/api/users/register', formData);
+      const API_URL = import.meta.env.VITE_API_URL;
+const response = await axios.post(`${API_URL}/api/users/register`, formData);
       
       // Store the token to keep the user logged in
       loginAction(response.data.token);

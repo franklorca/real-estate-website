@@ -14,8 +14,9 @@ const FeaturedListings = () => {
     const fetchFeaturedProperties = async () => {
       try {
         // Fetch all properties from our API
-        const response = await axios.get('http://localhost:5000/api/properties');
-        
+        const API_URL = import.meta.env.VITE_API_URL;
+        const response = await axios.get(`${API_URL}/api/properties`);
+
         // We only want to show the first 3 as "featured", so we slice the array
         setProperties(response.data.slice(0, 3));
 

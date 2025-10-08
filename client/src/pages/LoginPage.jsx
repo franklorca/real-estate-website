@@ -15,7 +15,8 @@ const LoginPage = () => {
     setError('');
     setSuccess('');
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/member-login', formData);
+      const API_URL = import.meta.env.VITE_API_URL;
+const response = await axios.post(`${API_URL}/api/auth/member-login`, formData);
       loginAction(response.data.token);
       setSuccess('Login successful! Redirecting...');
       setTimeout(() => navigate('/listings'), 1500);

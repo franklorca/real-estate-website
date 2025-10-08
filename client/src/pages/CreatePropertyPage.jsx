@@ -12,7 +12,8 @@ const CreatePropertyPage = () => {
 
   const handleCreateProperty = async (formData) => {
     try {
-      await axios.post('http://localhost:5000/api/properties', formData, {
+      const API_URL = import.meta.env.VITE_API_URL;
+      await axios.post(`${API_URL}/api/properties`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

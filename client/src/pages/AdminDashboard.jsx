@@ -12,7 +12,8 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchProperties = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/properties');
+        const API_URL = import.meta.env.VITE_API_URL;
+        const response = await axios.get(`${API_URL}/api/properties`);
         setProperties(response.data);
       } catch (error) {
         console.error("Failed to fetch properties", error);
@@ -24,7 +25,8 @@ const AdminDashboard = () => {
   const handleDelete = async (propertyId) => {
     if (window.confirm('Are you sure you want to delete this property?')) {
       try {
-        await axios.delete(`http://localhost:5000/api/properties/${propertyId}`, {
+        const API_URL = import.meta.env.VITE_API_URL;
+        await axios.delete(`${API_URL}/api/properties/${propertyId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         // Refresh the list by filtering out the deleted property
