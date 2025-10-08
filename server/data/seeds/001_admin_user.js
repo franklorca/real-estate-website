@@ -1,6 +1,6 @@
+// server/data/seeds/001_admin_user.js
 exports.seed = async function(knex) {
-  await knex('users').truncate();
-  
+  // Inserts the admin user. Assumes the table is already clean.
   await knex('users').insert([
     {
       id: 1, 

@@ -1,7 +1,6 @@
-// inside server/data/seeds/002_properties.js
+// server/data/seeds/002_properties.js
 exports.seed = async function(knex) {
-  // Deletes ALL existing entries
-  await knex('properties').del();
+  // The cleanup seed has already cleared the table. We just insert.
   await knex('properties').insert([
     {
     id: 1,
