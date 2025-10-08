@@ -28,7 +28,8 @@ const EditPropertyPage = () => {
 
   const handleUpdateProperty = async (formData) => {
     try {
-      await axios.put(`http://localhost:5000/api/properties/${id}`, formData, {
+        const API_URL = import.meta.env.VITE_API_URL;
+      await axios.put(`${API_URL}/api/properties/${id}`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

@@ -10,7 +10,8 @@ const ListingsPage = () => {
   useEffect(() => {
     const fetchProperties = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/properties');
+        const API_URL = import.meta.env.VITE_API_URL;
+        const response = await axios.get(`${API_URL}/api/properties`);
         setProperties(response.data);
       } catch (err) {
         setError('Could not fetch listings. Please try again later.');
