@@ -35,8 +35,7 @@ router.get('/:id', async (req, res) => {
 // We place the requireAdmin middleware before the main route logic.
 router.post('/', requireAdmin, async (req, res) => {
   try {
-    const [newPropertyId] = await db('properties').insert(req.body);
-    const newProperty = await db('properties').where({ id: newPropertyId }).first();
+    const [newProperty] = await db('properties').insert(req.body).returning('*');
     res.status(201).json(newProperty);
   } catch (error) {
     res.status(500).json({ message: 'Error creating property' });

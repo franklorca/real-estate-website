@@ -3,7 +3,6 @@ exports.seed = async function(knex) {
   // The cleanup seed has already cleared the table. We just insert.
   await knex('properties').insert([
     {
-    id: 1,
     title: 'Oceanfront Paradises',
     city: 'Malibu, CA',
     price: 12500000,
@@ -12,7 +11,6 @@ exports.seed = async function(knex) {
     image: 'https://images.unsplash.com/photo-1597285112431-115a1f48bde2?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
   },
   {
-    id: 2,
     title: 'Skyline Penthouse',
     city: 'New York, NY',
     price: 8900000,
@@ -21,7 +19,6 @@ exports.seed = async function(knex) {
     image: 'https://images.unsplash.com/photo-1674494777503-f5d3484104c9?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
   },
   {
-    id: 3,
     title: 'Modern Mountain Retreat',
     city: 'Aspen, CO',
     price: 6200000,
