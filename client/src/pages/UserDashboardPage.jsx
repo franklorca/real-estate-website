@@ -19,7 +19,8 @@ const UserDashboardPage = () => {
       }
 
       try {
-        const response = await axios.get('http://localhost:5000/api/users/me/saved-properties', {
+        const API_URL = import.meta.env.VITE_API_URL;
+        const response = await axios.get(`${API_URL}/api/users/me/saved-properties`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setSavedProperties(response.data);

@@ -38,7 +38,8 @@ export const AuthProvider = ({ children }) => {
     if (user && token) {
       const fetchSaved = async () => {
         try {
-          const response = await axios.get('http://localhost:5000/api/users/me/saved-properties', {
+          const API_URL = import.meta.env.VITE_API_URL;
+          const response = await axios.get(`${API_URL}/api/users/me/saved-properties`, {
             headers: { Authorization: `Bearer ${token}` },
           });
           // Create a Set of IDs from the fetched properties
@@ -59,7 +60,8 @@ export const AuthProvider = ({ children }) => {
 
   const saveProperty = async (propertyId) => {
     try {
-      await axios.post('http://localhost:5000/api/users/me/saved-properties', 
+      const API_URL = import.meta.env.VITE_API_URL;
+      await axios.post(`${API_URL}/api/users/me/saved-properties`, 
         { property_id: propertyId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -72,7 +74,8 @@ export const AuthProvider = ({ children }) => {
   
   const unsaveProperty = async (propertyId) => {
     try {
-      await axios.delete(`http://localhost:5000/api/users/me/saved-properties/${propertyId}`, {
+      const API_URL = import.meta.env.VITE_API_URL;
+      await axios.delete(`${API_URL}/api/users/me/saved-properties/${propertyId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       // Optimistic UI update: remove the ID from our set instantly
