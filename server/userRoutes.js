@@ -23,11 +23,11 @@ router.post('/register', async (req, res) => {
 
     const password_hash = bcrypt.hashSync(password, 10);
 
-    const [newUserId] = await db('users').insert({ name, email, password_hash, role: 'member' });
+    const [newUser] = await db('users')
+    .insert({ name, email, password_hash, role: 'member' })
+    .returning(['id', 'name', 'email']); // Ask for specific fields back
 
-    const newUser = await db('users').where({ id: newUserId }).first();
-
-    const payload = { userId: newUser.id, email: newUser.email, role: newUser.role, name: newUser.name };
+    const payload = { userId: newUser.id, email: newUser.email, role: 'member', name: newUser.name };
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1d' });
 
     res.status(201).json({

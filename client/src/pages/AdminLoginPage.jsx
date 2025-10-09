@@ -16,7 +16,8 @@ const AdminLoginPage = () => {
     setSuccess('');
     try {
       // Point to the correct admin login endpoint
-      const response = await axios.post('http://localhost:5000/api/auth/login', formData);
+            const API_URL = import.meta.env.VITE_API_URL;
+      const response = await axios.post(`${API_URL}/api/auth/login`, formData);
       loginAction(response.data.token);
       setSuccess('Admin login successful! Redirecting...');
       // Redirect to the admin dashboard on success
