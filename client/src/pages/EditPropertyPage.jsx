@@ -16,7 +16,8 @@ const EditPropertyPage = () => {
   useEffect(() => {
     const fetchProperty = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/properties/${id}`);
+        const API_URL = import.meta.env.VITE_API_URL;
+        const response = await axios.get(`${API_URL}/api/properties/${id}`);
         setProperty(response.data);
       } catch (err) {
         console.error("Failed to fetch property:", err);
