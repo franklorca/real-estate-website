@@ -1,6 +1,5 @@
 // server/authMiddleware.js
 const jwt = require('jsonwebtoken');
-const JWT_SECRET = 'a-super-secret-key-for-our-mvp';
 
 const requireAuth = (req, res, next) => {
   const authHeader = req.headers.authorization;
