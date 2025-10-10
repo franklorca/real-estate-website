@@ -20,7 +20,7 @@ const handleLogin = async (req, res, expectedRole) => {
     }
 
     const payload = { userId: user.id, email: user.email, role: user.role, name: user.name };
-    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1d' });
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1d' });
 
     res.json({
       message: 'Login successful!',

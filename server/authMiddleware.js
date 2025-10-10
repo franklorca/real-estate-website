@@ -10,7 +10,7 @@ const requireAuth = (req, res, next) => {
   if (!token) {
     return res.status(401).json({ message: 'Malformed token' });
   }
-  jwt.verify(token, JWT_SECRET, (err, decoded) => {
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err) {
       return res.status(403).json({ message: 'Invalid or expired token' });
     }
@@ -32,7 +32,7 @@ const requireAdmin = (req, res, next) => {
     return res.status(401).json({ message: 'Malformed token' });
   }
 
-  jwt.verify(token, JWT_SECRET, (err, decoded) => {
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err) {
       return res.status(403).json({ message: 'Invalid or expired token' });
     }

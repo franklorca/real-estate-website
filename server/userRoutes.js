@@ -27,7 +27,7 @@ router.post('/register', async (req, res) => {
     .returning(['id', 'name', 'email']); // Ask for specific fields back
 
     const payload = { userId: newUser.id, email: newUser.email, role: 'member', name: newUser.name };
-    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1d' });
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1d' });
 
     res.status(201).json({
       message: 'User registered successfully!',
