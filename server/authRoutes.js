@@ -4,7 +4,6 @@ const jwt = require('jsonwebtoken');
 const db = require('./db');
 
 const router = express.Router();
-const JWT_SECRET = 'a-super-secret-key-for-our-mvp';
 
 const handleLogin = async (req, res, expectedRole) => {
   const { email, password } = req.body;
