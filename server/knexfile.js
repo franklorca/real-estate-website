@@ -1,5 +1,4 @@
 // server/knexfile.js
-require('dotenv').config({ path: './.env' }); // Ensures we can load the .env file
 
 module.exports = {
   // This is the configuration for our live production environment on Render
