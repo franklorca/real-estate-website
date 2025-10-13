@@ -1,15 +1,18 @@
 // client/src/context/AuthContext.jsx
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react'; // <-- 1. ADD useState
+import { toast } from 'react-toastify';
 import { jwtDecode } from 'jwt-decode';
-import axios from 'axios';
+import api from '../services/api'; // Correctly imported
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
+  // --- 1. THESE LINES WERE MISSING ---
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(() => localStorage.getItem('token'));
   const [isLoading, setIsLoading] = useState(true);
-  const [savedPropertyIds, setSavedPropertyIds] = useState(new Set()); // Using a Set for efficient lookups
+  const [savedPropertyIds, setSavedPropertyIds] = useState(new Set());
+  // ------------------------------------
 
   // This effect handles user login/logout and token decoding
   useEffect(() => {
@@ -21,7 +24,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('token', token);
       } else {
         setUser(null);
-        setSavedPropertyIds(new Set()); // Clear saved properties on logout
+        setSavedPropertyIds(new Set());
         localStorage.removeItem('token');
       }
     } catch (error) {
@@ -38,11 +41,8 @@ export const AuthProvider = ({ children }) => {
     if (user && token) {
       const fetchSaved = async () => {
         try {
-          const API_URL = import.meta.env.VITE_API_URL;
-          const response = await axios.get(`${API_URL}/api/users/me/saved-properties`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          // Create a Set of IDs from the fetched properties
+          // --- 2. THIS WAS MISSING 'api.get' ---
+          const response = await api.get('/api/users/me/saved-properties');
           const ids = new Set(response.data.map(p => p.id));
           setSavedPropertyIds(ids);
         } catch (error) {
@@ -51,41 +51,41 @@ export const AuthProvider = ({ children }) => {
       };
       fetchSaved();
     }
-  }, [user, token]); // Runs when user or token changes
+  }, [user, token]);
 
   const loginAction = (newToken) => setToken(newToken);
   const logOut = () => setToken(null);
 
-  // --- NEW FUNCTIONS TO MANAGE SAVED PROPERTIES ---
-
   const saveProperty = async (propertyId) => {
     try {
-      const API_URL = import.meta.env.VITE_API_URL;
-      await axios.post(`${API_URL}/api/users/me/saved-properties`, 
-        { property_id: propertyId },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      // Optimistic UI update: add the ID to our set instantly
+      await api.post('/api/users/me/saved-properties', { property_id: propertyId });
+      toast.success('Property saved!');
       setSavedPropertyIds(prevIds => new Set(prevIds).add(propertyId));
     } catch (error) {
       console.error("Failed to save property", error);
+      // Check for a 409 Conflict error, which means it's already saved
+      if (error.response && error.response.status === 409) {
+        toast.info('This property is already in your saved list.');
+      } else {
+        toast.error('Could not save property. Please try again.');
+      }
     }
   };
   
   const unsaveProperty = async (propertyId) => {
     try {
-      const API_URL = import.meta.env.VITE_API_URL;
-      await axios.delete(`${API_URL}/api/users/me/saved-properties/${propertyId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      // Optimistic UI update: remove the ID from our set instantly
+      // --- 3. THE API INTERCEPTOR HANDLES THE TOKEN, SO WE CAN SIMPLIFY THIS CALL ---
+      await api.delete(`/api/users/me/saved-properties/${propertyId}`);
+      
       setSavedPropertyIds(prevIds => {
         const newIds = new Set(prevIds);
         newIds.delete(propertyId);
         return newIds;
       });
+      toast.info('Property removed from saved list.');
     } catch (error) {
       console.error("Failed to unsave property", error);
+      toast.error('Could not remove property. Please try again.');
     }
   };
 

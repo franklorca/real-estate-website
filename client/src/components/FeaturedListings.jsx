@@ -1,6 +1,6 @@
 // client/src/components/FeaturedListings.jsx
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 import PropertyCard from './PropertyCard'; // We still need this component
 
 const FeaturedListings = () => {
@@ -14,8 +14,7 @@ const FeaturedListings = () => {
     const fetchFeaturedProperties = async () => {
       try {
         // Fetch all properties from our API
-        const API_URL = import.meta.env.VITE_API_URL;
-        const response = await axios.get(`${API_URL}/api/properties`);
+        const response = await api.get('/api/properties');
 
         // We only want to show the first 3 as "featured", so we slice the array
         setProperties(response.data.slice(0, 3));
