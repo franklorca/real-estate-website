@@ -1,6 +1,7 @@
 // client/src/pages/SignUpPage.jsx
 import React, { useState } from 'react';
-import axios from 'axios';
+import { toast } from 'react-toastify';
+import api from '../services/api'; // <-- IMPORT OUR NEW API SERVICE
 import { useNavigate } from 'react-router-dom'; // Hook for navigation
 import { useAuth } from '../context/AuthContext';
 
@@ -10,8 +11,6 @@ const SignUpPage = () => {
     email: '',
     password: '',
   });
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const navigate = useNavigate(); // Initialize the navigate function
   const { loginAction } = useAuth(); 
 
@@ -21,17 +20,15 @@ const SignUpPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
+    toast.dismiss();
 
     try {
-      const API_URL = import.meta.env.VITE_API_URL;
-const response = await axios.post(`${API_URL}/api/users/register`, formData);
-      
+      const response = await api.post('/api/users/register', formData);
+
       // Store the token to keep the user logged in
       loginAction(response.data.token);
-      
-      setSuccess('Registration successful! Redirecting...');
+
+      toast.success('Registration successful! Redirecting...');
 
       // Redirect to the listings page after a short delay
       setTimeout(() => {
@@ -39,7 +36,7 @@ const response = await axios.post(`${API_URL}/api/users/register`, formData);
       }, 1500);
 
     } catch (err) {
-      setError(err.response?.data?.message || 'An error occurred during registration.');
+      toast.error(err.response?.data?.message || 'An error occurred during registration.');
     }
   };
 
@@ -87,9 +84,6 @@ const response = await axios.post(`${API_URL}/api/users/register`, formData);
               onChange={handleChange}
             />
           </div>
-
-          {error && <p className="text-sm text-red-600 text-center">{error}</p>}
-          {success && <p className="text-sm text-green-600 text-center">{success}</p>}
           
           <div>
             <button

@@ -1,57 +1,57 @@
 // client/src/pages/EditPropertyPage.jsx
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import PropertyForm from '../components/PropertyForm'; // Reusing our form!
+import React, { useState, useEffect } from "react"; // <-- IMPORTED useState and useEffect
+import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "react-toastify";
+import api from "../services/api";
+import PropertyForm from "../components/PropertyForm";
 
 const EditPropertyPage = () => {
+  // --- THESE LINES WERE MISSING/INCORRECT ---
   const [property, setProperty] = useState(null); // State to hold the fetched property
-  const [error, setError] = useState('');
-  const { id } = useParams(); // Gets the ':id' from the URL
+  const { id } = useParams();
   const navigate = useNavigate();
-  const { token } = useAuth();
+  // ------------------------------------------
 
-  // Effect to fetch the property data when the component mounts
   useEffect(() => {
     const fetchProperty = async () => {
       try {
-        const API_URL = import.meta.env.VITE_API_URL;
-        const response = await axios.get(`${API_URL}/api/properties/${id}`);
-        setProperty(response.data);
+        const response = await api.get(`/api/properties/${id}`);
+        setProperty(response.data); // Correctly set the state
       } catch (err) {
         console.error("Failed to fetch property:", err);
-        setError('Could not load property data.');
+        toast.error("Could not load property data.");
+        navigate("/admin/dashboard"); // Redirect if property can't be found
       }
     };
     fetchProperty();
-  }, [id]); // Re-run if the ID in the URL changes
+  }, [id]);
 
   const handleUpdateProperty = async (formData) => {
     try {
-        const API_URL = import.meta.env.VITE_API_URL;
-      await axios.put(`${API_URL}/api/properties/${id}`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      navigate('/admin/dashboard');
+      await api.put(`/api/properties/${id}`, formData);
+      toast.success("Property updated successfully!");
+      navigate("/admin/dashboard");
     } catch (err) {
       console.error("Failed to update property:", err);
-      setError('Failed to update property. Please check the fields and try again.');
+      toast.error(
+        "Failed to update property. Please check the fields and try again."
+      );
     }
   };
-  
-  // Show loading state until the property data is fetched
-  if (!property) return <div>Loading...</div>;
+
+  // Handle the loading state gracefully
+  if (!property) {
+    return <div className="text-center py-40">Loading property data...</div>;
+  }
 
   return (
-    <div className="bg-gray-100 min-h-screen flex items-center justify-center">
-      <div className="w-full max-w-2xl p-8 bg-white rounded-lg shadow-lg">
-        <h1 className="text-2xl font-bold mb-6 text-center">Edit Property</h1>
-        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-        <PropertyForm 
-          initialData={property} // Pass the fetched data to pre-fill the form
+    <div className="bg-gray-100 min-h-screen flex items-center justify-center py-12 px-4">
+      <div className="w-full max-w-3xl p-8 bg-white rounded-lg shadow-lg">
+        <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">
+          Edit Property
+        </h1>
+        <PropertyForm
+          initialData={property}
           onSubmit={handleUpdateProperty}
           buttonText="Update Property"
         />

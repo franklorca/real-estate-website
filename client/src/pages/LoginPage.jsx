@@ -1,27 +1,24 @@
 // client/src/pages/LoginPage.jsx
-import React, { useState } from 'react';
-import axios from 'axios';
+import React from 'react';
+import { toast } from 'react-toastify';
+import api from '../services/api'; // <-- IMPORT OUR NEW API SERVICE
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import LoginForm from '../components/LoginForm'; // Import the new reusable component
 
 const LoginPage = () => {
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const navigate = useNavigate();
   const { loginAction } = useAuth();
 
   const handleMemberLogin = async (formData) => {
-    setError('');
-    setSuccess('');
+    toast.dismiss();
     try {
-      const API_URL = import.meta.env.VITE_API_URL;
-const response = await axios.post(`${API_URL}/api/auth/member-login`, formData);
+      const response = await api.post('/api/auth/member-login', formData);
       loginAction(response.data.token);
-      setSuccess('Login successful! Redirecting...');
+      toast.success('Login successful! Redirecting...');
       setTimeout(() => navigate('/listings'), 1500);
     } catch (err) {
-      setError(err.response?.data?.message || 'An error occurred during login.');
+      toast.error(err.response?.data?.message || 'An error occurred during login.');
     }
   };
 
@@ -30,8 +27,6 @@ const response = await axios.post(`${API_URL}/api/auth/member-login`, formData);
       <div className="w-full max-w-md">
         <LoginForm
           onSubmit={handleMemberLogin}
-          error={error}
-          success={success}
           title="Member Login"
           subtitle="Welcome back to Luminous Heaven."
           buttonText="Sign In"

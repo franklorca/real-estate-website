@@ -1,7 +1,7 @@
 // client/src/components/LoginForm.jsx
 import React, { useState } from 'react';
 
-const LoginForm = ({ onSubmit, error, success, title, subtitle, buttonText }) => {
+const LoginForm = ({ onSubmit, title, subtitle, buttonText }) => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -13,7 +13,7 @@ const LoginForm = ({ onSubmit, error, success, title, subtitle, buttonText }) =>
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData); // Pass the form data up to the parent page
+    onSubmit(formData);
   };
 
   return (
@@ -39,8 +39,7 @@ const LoginForm = ({ onSubmit, error, success, title, subtitle, buttonText }) =>
           />
         </div>
 
-        {error && <p className="text-sm text-red-600 text-center">{error}</p>}
-        {success && <p className="text-sm text-green-600 text-center">{success}</p>}
+        {/* The error/success messages are now removed from this reusable component */}
         
         <div>
           <button
