@@ -4,29 +4,40 @@ import { motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
 
-// A simple Heart Icon SVG component
-const HeartIcon = ({ isSaved }) => (
+// --- NEW BOOKMARK ICON ---
+const BookmarkIcon = ({ isSaved }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
-    fill="currentColor"
-    className={`w-6 h-6 ${isSaved ? "text-red-500" : "text-gray-400"}`}
+    // Fill the icon if saved, stroke it if not.
+    fill={isSaved ? "currentColor" : "none"}
+    stroke="currentColor"
+    strokeWidth="2"
+    className={`w-6 h-6 transition-all duration-300 ${
+      isSaved ? "text-brand-accent" : "text-white"
+    }`}
   >
-    <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-1.344-.688 15.182 15.182 0 01-1.443-1.043c-.427-.379-1.03-1.01-1.58-1.748C6.182 15.936 5.2 14.39 4.5 12.842c-.37-.771-.634-1.632-.8-2.529C3.454 9.172 3.225 8.12 3.225 7.054c0-1.62.383-3.09 1.125-4.267C5.093 1.61 6.273.825 7.725.825c.995 0 1.912.333 2.657.981.745.648 1.293 1.543 1.618 2.585.325-1.042.873-1.937 1.618-2.585.745-.648 1.662-.981 2.657-.981 1.452 0 2.633.785 3.375 1.962.742 1.178 1.125 2.648 1.125 4.267 0 1.066-.229 2.118-.499 3.029-.166.897-.43 1.758-.8 2.529-.7 1.548-1.682 3.094-2.784 4.384-.55.738-1.153 1.37-1.58 1.748a15.182 15.182 0 01-1.443 1.043 15.247 15.247 0 01-1.344.688l-.022.012-.007.003z" />
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.5 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z"
+    />
   </svg>
 );
 
 const PropertyCard = ({ property, onUnsave }) => {
-  // Get everything we need from the Auth Context
   const { user, savedPropertyIds, saveProperty, unsaveProperty } = useAuth();
 
-  const isSaved = savedPropertyIds.has(property.id);
+  // Ensure savedPropertyIds is always a Set to prevent errors
+  const isSaved =
+    savedPropertyIds instanceof Set && savedPropertyIds.has(property.id);
 
   const handleSaveToggle = (e) => {
-    e.stopPropagation(); // Prevent card click-through
+    e.preventDefault();
+    e.stopPropagation(); // Prevent navigation when clicking the button
     if (isSaved) {
       unsaveProperty(property.id);
-      if (onUnsave) onUnsave(property.id); // Notify parent (for dashboard)
+      if (onUnsave) onUnsave(property.id);
     } else {
       saveProperty(property.id);
     }
@@ -36,68 +47,96 @@ const PropertyCard = ({ property, onUnsave }) => {
     style: "currency",
     currency: "USD",
     minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
   }).format(property.price);
+
+  const getStatusClasses = (status) => {
+    switch (status) {
+      case "Under Offer":
+        return "bg-yellow-100 text-yellow-800 ring-yellow-600/20";
+      case "Sold":
+        return "bg-red-100 text-red-800 ring-red-600/20";
+      default:
+        return "bg-green-100 text-green-800 ring-green-600/20";
+    }
+  };
 
   return (
     <motion.div
-      className="bg-white rounded-lg shadow-lg overflow-hidden"
-      whileHover={{ y: -8, scale: 1.02, shadow: "xl" }}
-      transition={{ type: "spring", stiffness: 300 }}
+      className="bg-brand-bg-white rounded-lg shadow-sm border border-gray-200/80 overflow-hidden group transition-shadow duration-300 hover:shadow-xl"
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.3 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
     >
       <div className="relative">
-        <img
-          src={property.image}
-          alt={property.title}
-          className="w-full h-56 object-cover"
-        />
-        <div className="absolute top-2 right-2 bg-black bg-opacity-50 text-white px-3 py-1 rounded-md text-sm font-bold">
-          EXCLUSIVE
-        </div>
-        {user && (
+        <Link
+          to={`/properties/${property.id}`}
+          className="block h-64 w-full overflow-hidden"
+        >
+          <img
+            src={property.image}
+            alt={property.title}
+            className="w-full h-full object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
+          />
+        </Link>
+
+        {/* --- DEFINITIVE FIX: Bookmark button is ALWAYS VISIBLE for active members --- */}
+        {user && user.membership_status === "active" && (
           <button
             onClick={handleSaveToggle}
-            className="absolute top-2 left-2 bg-white/80 p-2 rounded-full hover:bg-white transition-colors"
+            className="absolute top-3 right-3 bg-black/40 p-2 rounded-full transition-transform transform hover:scale-110 active:scale-95"
+            aria-label="Save property"
           >
-            <HeartIcon isSaved={isSaved} />
+            <BookmarkIcon isSaved={isSaved} />
           </button>
         )}
+
+        <div className="absolute top-3 left-3 bg-brand-dark/70 text-white px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider">
+          {property.listing_type === "Vacation Rental" ? "Stay" : "For Sale"}
+        </div>
+
+        {property.status && (
+          <div
+            className={`absolute bottom-0 left-0 px-3 py-1 rounded-tr-lg text-xs font-semibold uppercase ring-1 ring-inset ${getStatusClasses(
+              property.status
+            )}`}
+          >
+            {property.status}
+          </div>
+        )}
       </div>
-      <div className="p-5">
-        <h3 className="text-xl font-bold text-gray-800 mb-1">
-          {property.title}
-        </h3>
-        <p className="text-gray-600 mb-4">{property.city}</p>
-        <div className="flex justify-between items-center">
-          {user ? (
-            <span className="text-lg font-semibold text-gray-900">
+
+      <div className="p-6">
+        <Link to={`/properties/${property.id}`} className="block">
+          <h3 className="font-serif text-2xl font-semibold text-brand-dark mb-1 truncate group-hover:text-brand-accent transition-colors">
+            {property.title}
+          </h3>
+        </Link>
+        <p className="font-sans text-brand-light mb-4">{property.city}</p>
+
+        <div className="flex justify-between items-center border-t border-gray-200/80 pt-4">
+          {user && user.membership_status === "active" ? (
+            <span className="font-sans text-xl font-bold text-brand-dark">
               {formattedPrice}
             </span>
           ) : (
-            <span className="text-lg font-semibold text-gray-900 blur-sm select-none">
+            <span className="font-sans text-xl font-semibold text-brand-dark blur-sm select-none">
               $8,888,888
             </span>
           )}
-          <div className="text-sm text-gray-500">
+          <div className="font-sans text-sm text-brand-light">
             <span>{property.bedrooms} Beds</span> &middot;{" "}
             <span>{property.bathrooms} Baths</span>
           </div>
         </div>
-        {user ? (
-          <div className="mt-4">
-            <Link to={`/properties/${property.id}`}>
-              <button className="w-full bg-gray-800 text-white py-2 rounded-lg font-semibold hover:bg-gray-900 transition-colors duration-300">
-                View Details
-              </button>
-            </Link>
-          </div>
-        ) : (
+
+        {(!user || user.membership_status !== "active") && (
           <div className="mt-4">
             <Link
-              to="/signup"
-              className="block w-full text-center bg-gray-800 text-white py-2 rounded-lg font-semibold hover:bg-gray-900 transition-colors duration-300"
+              to={user ? "/pricing" : "/signup"}
+              className="block w-full text-center bg-brand-accent text-white py-2.5 rounded-md font-semibold hover:bg-brand-dark transition-colors"
             >
-              Join to Unlock Details
+              {user ? "Upgrade to View Price" : "Join to Unlock Price"}
             </Link>
           </div>
         )}
