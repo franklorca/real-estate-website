@@ -1,51 +1,134 @@
 // client/src/components/Hero.jsx
-import React from 'react';
-import { motion } from 'framer-motion';
-import HeroBackground from '../assets/hero-background.jpg'; // Make sure the image path is correct
+import React, { useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { Link } from "react-router-dom";
+import HeroVideo from "../assets/hero-video.mp4"; // Make sure your video is here
+
+// Reusable animated character component for the headline
+const AnimatedCharacters = ({ text }) => {
+  // Animation variants for each character
+  const item = {
+    hidden: {
+      y: "200%",
+      transition: { ease: [0.455, 0.03, 0.515, 0.955], duration: 0.85 },
+    },
+    visible: {
+      y: 0,
+      transition: { ease: [0.455, 0.03, 0.515, 0.955], duration: 0.75 },
+    },
+  };
+
+  // Split the text into words and then characters
+  const splitWords = text.split(" ");
+  const words = [];
+  splitWords.forEach((word) => {
+    words.push(word.split(""));
+  });
+
+  return (
+    // Map over each word
+    <span className="font-serif">
+      {words.map((word, index) => (
+        <span key={index} className="inline-block whitespace-nowrap mr-[0.5em]">
+          {" "}
+          {/* Use 'em' for spacing relative to font size */}
+          {/* Map over each character in the word */}
+          {word.map((char, i) => (
+            <span className="inline-block overflow-hidden" key={i}>
+              <motion.span className="inline-block" variants={item}>
+                {char}
+              </motion.span>
+            </span>
+          ))}
+        </span>
+      ))}
+    </span>
+  );
+};
 
 const Hero = () => {
+  const targetRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: targetRef,
+    offset: ["end end", "end start"], // Track scroll from the end of the hero to the start of the next section
+  });
+
+  // Create parallax effects for the content as the user scrolls down
+  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.8]);
+
+  // Stagger animation for the container
+  const container = {
+    visible: {
+      transition: {
+        staggerChildren: 0.025,
+      },
+    },
+  };
+
   return (
-    <div
-      className="relative flex items-center justify-center min-h-screen bg-cover bg-center text-white"
-      style={{ backgroundImage: `url(${HeroBackground})` }}
-    >
-      {/* Black overlay for better text readability */}
-      <div className="absolute inset-0 bg-black opacity-50"></div>
+    // The main section is used as a scroll target
+    <section ref={targetRef} className="relative h-screen w-full">
+      {/* --- Sticky container to hold the hero while scrolling --- */}
+      <motion.div
+        style={{ opacity, scale }}
+        className="fixed inset-0 flex items-center justify-center"
+      >
+        {/* --- Video Background Layer --- */}
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          <video
+            className="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto object-cover transform -translate-x-1/2 -translate-y-1/2"
+            autoPlay
+            loop
+            muted
+            playsInline
+          >
+            <source src={HeroVideo} type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+          <div className="absolute inset-0 bg-brand-dark opacity-50"></div>
+        </div>
 
-      <div className="relative z-10 text-center p-4">
-        {/* Animated main headline */}
-        <motion.h1
-          initial={{ opacity: 0, y: -50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="text-5xl md:text-7xl font-bold mb-4"
+        {/* --- Frosted Glass Content Panel --- */}
+        <motion.div
+          className="relative z-10 w-[90%] max-w-4xl bg-white/10 backdrop-blur-md rounded-xl shadow-2xl p-8 sm:p-12 text-center text-white"
+          initial="hidden"
+          animate="visible"
+          variants={container}
         >
-          Luminous Heaven
-        </motion.h1>
+          <h1
+            className="text-5xl sm:text-7xl lg:text-8xl font-bold tracking-tight"
+            style={{ textShadow: "0 2px 20px rgba(0,0,0,0.5)" }}
+          >
+            <AnimatedCharacters text="Luminous Heaven" />
+          </h1>
 
-        {/* Animated sub-headline */}
-        <motion.p
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
-          className="text-xl md:text-2xl mb-8"
-        >
-          Your Gateway to Extraordinary Living.
-        </motion.p>
+          <motion.p
+            className="font-sans mt-6 text-lg sm:text-xl max-w-2xl mx-auto opacity-90"
+            style={{ textShadow: "0 1px 10px rgba(0,0,0,0.5)" }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 1.5, ease: "easeOut" }}
+          >
+            Your Gateway to Extraordinary Living and Exclusive Stays.
+          </motion.p>
 
-        {/* Animated button */}
-        <motion.button
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.6 }}
-          whileHover={{ scale: 1.05, backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
-          whileTap={{ scale: 0.95 }}
-          className="bg-transparent border-2 border-white text-white font-bold py-3 px-8 rounded-lg text-lg uppercase tracking-wider transition-colors duration-300"
-        >
-          Explore Exclusive Listings
-        </motion.button>
-      </div>
-    </div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 1.7, ease: "easeOut" }}
+            className="mt-10"
+          >
+            <Link
+              to="/pricing"
+              className="font-sans bg-brand-accent text-white font-semibold py-3 px-8 rounded-md text-lg uppercase tracking-wider transition-transform transform hover:scale-105 shadow-lg"
+            >
+              Become a Member
+            </Link>
+          </motion.div>
+        </motion.div>
+      </motion.div>
+    </section>
   );
 };
 

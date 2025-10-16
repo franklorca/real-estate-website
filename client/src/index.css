@@ -2,3 +2,5 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Remove the @layer base and body styles from this file. */
