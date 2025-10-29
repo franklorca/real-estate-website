@@ -1,7 +1,6 @@
-// client/src/App.jsx
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-import { ToastContainer } from "react-toastify"; // <-- IMPORT CONTAINER
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 // Layout Components
@@ -27,6 +26,7 @@ import EditAgentPage from "./pages/EditAgentPage";
 import AdminUsersPage from "./pages/AdminUsersPage";
 import EditUserPage from "./pages/EditUserPage";
 import PricingPage from "./pages/PricingPage";
+import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 
 function App() {
   return (
@@ -39,6 +39,7 @@ function App() {
             <Route path="listings" element={<ListingsPage />} />
             <Route path="properties/:id" element={<PropertyDetailPage />} />
             <Route path="pricing" element={<PricingPage />} />
+            <Route path="/payment/success" element={<PaymentSuccessPage />} />
           </Route>
 
           {/* --- Auth Routes (No Layout) --- */}
