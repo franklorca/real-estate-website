@@ -7,7 +7,6 @@ import AgentProfile from "../components/AgentProfile";
 
 // --- Helper Components ---
 
-// Stat Icon for Beds/Baths
 const StatIcon = ({ icon, label }) => (
   <div className="flex items-center text-gray-600">
     {icon}
@@ -47,16 +46,14 @@ const BathIcon = () => (
   </svg>
 );
 
-// YouTube Video Player
 const VideoPlayer = ({ videoUrl }) => {
-  // Extract video ID from various YouTube URL formats
   let videoId;
   try {
     const url = new URL(videoUrl);
     videoId = url.searchParams.get("v") || url.pathname.split("/").pop();
   } catch (error) {
     console.error("Invalid video URL:", videoUrl);
-    return null; // Don't render if URL is invalid
+    return null;
   }
 
   const embedUrl = `https://www.youtube.com/embed/${videoId}`;
@@ -74,7 +71,7 @@ const VideoPlayer = ({ videoUrl }) => {
   );
 };
 
-// Main Page Component
+// --- Main Page Component ---
 const PropertyDetailPage = () => {
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -82,6 +79,8 @@ const PropertyDetailPage = () => {
   const [activeImage, setActiveImage] = useState("");
   const { id } = useParams();
   const { user } = useAuth();
+
+  const hasActiveMembership = user && user.membership_status === "active";
 
   useEffect(() => {
     const fetchProperty = async () => {
@@ -122,15 +121,15 @@ const PropertyDetailPage = () => {
   const galleryImages = property.image_gallery || [];
 
   return (
-    <div className="bg-white">
+    <div className="bg-brand-bg-white">
       <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
-        {/* --- Editorial Header --- */}
-        <div className="lg:flex lg:items-center lg:justify-between mb-8 pb-8 border-b border-gray-200">
+        {/* --- Editorial Header (Visible to all) --- */}
+        <div className="lg:flex lg:items-center lg:justify-between mb-8 pb-8 border-b border-brand-divider">
           <div>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-gray-900">
+            <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-brand-dark">
               {property.title}
             </h1>
-            <p className="mt-2 text-lg text-gray-500">{property.city}</p>
+            <p className="mt-2 text-lg text-brand-light">{property.city}</p>
           </div>
           <div className="mt-4 lg:mt-0 flex items-center space-x-6">
             <StatIcon icon={<BedIcon />} label={`${property.bedrooms} Beds`} />
@@ -150,7 +149,7 @@ const PropertyDetailPage = () => {
           </div>
         </div>
 
-        {/* --- Image Gallery --- */}
+        {/* --- Image Gallery (Main image visible to all, gallery for members) --- */}
         <div className="flex flex-col gap-4 mb-16">
           <div className="w-full h-[250px] sm:h-[400px] md:h-[550px] bg-gray-200 rounded-lg overflow-hidden shadow-2xl">
             <img
@@ -159,7 +158,8 @@ const PropertyDetailPage = () => {
               className="w-full h-full object-cover"
             />
           </div>
-          {galleryImages.length > 1 && (
+
+          {hasActiveMembership && galleryImages.length > 1 && (
             <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
               {galleryImages.map((img, index) => (
                 <div
@@ -172,7 +172,7 @@ const PropertyDetailPage = () => {
                     alt={`${property.title} thumbnail ${index + 1}`}
                     className={`w-full h-full object-cover transition-opacity duration-300 ${
                       activeImage === img
-                        ? "opacity-100 ring-2 ring-indigo-500"
+                        ? "opacity-100 ring-2 ring-brand-accent"
                         : "opacity-60 hover:opacity-100"
                     }`}
                   />
@@ -187,76 +187,102 @@ const PropertyDetailPage = () => {
           {/* --- Left Column - Details --- */}
           <div className="lg:col-span-2">
             <section>
-              <h2 className="text-2xl font-semibold text-gray-800">
+              <h2 className="font-serif text-3xl font-semibold text-brand-dark">
                 Property Description
               </h2>
-              <div className="mt-4 prose max-w-none text-gray-700 leading-relaxed">
+              <div className="mt-4 prose max-w-none text-brand-light leading-relaxed">
                 <p>{property.description}</p>
               </div>
             </section>
 
-            {property.video_url && (
-              <section className="mt-12 pt-8 border-t">
-                <h2 className="text-2xl font-semibold text-gray-800">
-                  Video Tour
-                </h2>
-                <div className="mt-4">
-                  <VideoPlayer videoUrl={property.video_url} />
+            {hasActiveMembership ? (
+              <>
+                {property.video_url && (
+                  <section className="mt-12 pt-8 border-t border-brand-divider">
+                    <h2 className="font-serif text-3xl font-semibold text-brand-dark">
+                      Video Tour
+                    </h2>
+                    <div className="mt-4">
+                      <VideoPlayer videoUrl={property.video_url} />
+                    </div>
+                  </section>
+                )}
+                {property.floor_plan_url && (
+                  <section className="mt-12 pt-8 border-t border-brand-divider">
+                    <h2 className="font-serif text-3xl font-semibold text-brand-dark">
+                      Floor Plan
+                    </h2>
+                    <div className="mt-4 border rounded-lg overflow-hidden">
+                      <img
+                        src={property.floor_plan_url}
+                        alt="Floor Plan"
+                        className="w-full h-auto"
+                      />
+                    </div>
+                  </section>
+                )}
+              </>
+            ) : (
+              (property.video_url || property.floor_plan_url) && (
+                <div className="mt-12 pt-8 border-t border-brand-divider text-center bg-brand-bg-light p-8 rounded-lg">
+                  <h3 className="font-serif text-2xl font-semibold text-brand-dark">
+                    Unlock Full Media Access
+                  </h3>
+                  <p className="mt-2 text-brand-light">
+                    Video tours and floor plans are available exclusively for
+                    our members.
+                  </p>
+                  <Link
+                    to="/pricing"
+                    className="mt-6 inline-block w-full sm:w-auto bg-brand-accent text-white py-3 px-6 rounded-md font-semibold hover:bg-brand-dark transition-colors"
+                  >
+                    Become a Member
+                  </Link>
                 </div>
-              </section>
-            )}
-
-            {property.floor_plan_url && (
-              <section className="mt-12 pt-8 border-t">
-                <h2 className="text-2xl font-semibold text-gray-800">
-                  Floor Plan
-                </h2>
-                <div className="mt-4 border rounded-lg overflow-hidden">
-                  <img
-                    src={property.floor_plan_url}
-                    alt="Floor Plan"
-                    className="w-full h-auto"
-                  />
-                </div>
-              </section>
+              )
             )}
           </div>
 
           {/* --- Right Column - Price & Contact --- */}
           <div className="lg:col-span-1">
             <div className="sticky top-10 space-y-8">
-              <div className="bg-gray-50 p-6 rounded-lg shadow-lg border">
-                <p className="text-sm font-medium text-gray-500">Price</p>
-                <p className="text-4xl font-bold text-gray-900 mt-1">
-                  {new Intl.NumberFormat("en-US", {
-                    style: "currency",
-                    currency: "USD",
-                    minimumFractionDigits: 0,
-                  }).format(property.price)}
-                </p>
+              <div className="bg-brand-bg-light p-6 rounded-lg shadow-sm border border-gray-200/80">
+                <p className="text-sm font-medium text-brand-light">Price</p>
+                {hasActiveMembership ? (
+                  <p className="text-4xl font-bold text-brand-dark mt-1">
+                    {new Intl.NumberFormat("en-US", {
+                      style: "currency",
+                      currency: "USD",
+                      minimumFractionDigits: 0,
+                    }).format(property.price)}
+                  </p>
+                ) : (
+                  <div className="mt-2 text-3xl font-bold text-brand-dark blur-md select-none">
+                    $8,888,888
+                  </div>
+                )}
               </div>
 
-              {user && user.membership_status === "active" ? (
-                <div className="bg-gray-50 p-6 rounded-lg shadow-lg border">
+              {hasActiveMembership ? (
+                <div className="bg-brand-bg-light p-6 rounded-lg shadow-sm border border-gray-200/80">
                   <AgentProfile
                     agentId={property.agent_id}
                     propertyId={property.id}
                   />
                 </div>
               ) : (
-                <div className="bg-gray-50 p-6 rounded-lg shadow-lg border text-center">
-                  <h3 className="text-xl font-semibold text-gray-900">
+                <div className="bg-brand-bg-light p-6 rounded-lg shadow-sm border border-gray-200/80 text-center">
+                  <h3 className="font-serif text-xl font-semibold text-brand-dark">
                     Unlock Agent Details
                   </h3>
-                  <p className="mt-2 text-gray-600">
-                    This is an exclusive property. Join now to contact the agent
-                    directly.
+                  <p className="mt-2 text-brand-light">
+                    Join now to contact the agent directly.
                   </p>
                   <Link
-                    to="/pricing"
-                    className="mt-4 inline-block w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700"
+                    to={user ? "/pricing" : "/login?redirect=/pricing"}
+                    className="mt-6 inline-block w-full bg-brand-accent text-white py-3 rounded-lg font-semibold hover:bg-brand-dark transition-colors"
                   >
-                    Become a Member
+                    {user ? "Upgrade Your Membership" : "Login to Continue"}
                   </Link>
                 </div>
               )}

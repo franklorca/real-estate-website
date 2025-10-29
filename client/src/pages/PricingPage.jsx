@@ -29,8 +29,8 @@ const PricingPage = () => {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
-  // If user is already an active member, redirect them to the dashboard.
   if (user && user.membership_status === "active") {
+    toast.info("You are already an active member.");
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -40,14 +40,17 @@ const PricingPage = () => {
       const response = await api.post("/api/payments/create-checkout-session");
       window.location.href = response.data.url;
     } catch (error) {
-      toast.error("Could not initiate payment. Please try again later.");
+      toast.error(
+        error.response?.data?.error ||
+          "Could not initiate payment. Please try again."
+      );
       setIsLoading(false);
     }
   };
 
   return (
     <div className="relative bg-brand-dark min-h-screen flex items-center justify-center p-4 overflow-hidden">
-      {/* Subtle background gradient light */}
+      {/* Background gradient */}
       <div
         className="absolute top-1/2 left-1/2 w-[60rem] h-[60rem] -translate-x-1/2 -translate-y-1/2 bg-indigo-900/20 rounded-full blur-3xl"
         aria-hidden="true"
@@ -73,20 +76,21 @@ const PricingPage = () => {
           </ul>
         </div>
 
+        {/* --- PROMOTIONAL PRICE UI --- */}
         <div className="mt-10 text-center bg-white/10 p-8 rounded-lg">
-          <p className="font-semibold text-gray-300">Lifetime Membership</p>
-          <p className="my-2">
-            <span className="text-5xl font-bold">$499</span>
-            <span className="text-lg text-gray-400"> / one-time</span>
-          </p>
-          <p className="text-xs text-gray-400">No recurring fees. Ever.</p>
+          <p className="font-semibold text-gray-300">Limited Time Offer</p>
+          <div className="my-2 flex items-center justify-center gap-x-4">
+            <span className="text-3xl text-gray-400 line-through">$50</span>
+            <span className="text-5xl font-bold text-white">$30</span>
+          </div>
+          <p className="text-sm text-gray-400">One-time payment</p>
         </div>
 
         <div className="mt-10">
           {user ? (
             <button
               onClick={handleJoinNow}
-              disabled={isLoading || user.membership_status === "active"}
+              disabled={isLoading}
               className="w-full bg-brand-accent hover:bg-indigo-500 text-white font-bold py-4 px-6 rounded-lg text-lg transition-colors transform hover:scale-105 disabled:bg-indigo-400 disabled:cursor-not-allowed"
             >
               {isLoading ? "Processing..." : "Secure Checkout with Stripe"}
@@ -94,19 +98,20 @@ const PricingPage = () => {
           ) : (
             <div className="text-center">
               <p className="mb-4 text-gray-300">
-                You must be logged in to purchase a membership.
+                Please sign up or log in to continue.
               </p>
               <Link
                 to="/login?redirect=/pricing"
                 className="bg-brand-accent hover:bg-indigo-500 text-white font-bold py-3 px-8 rounded-lg"
               >
-                Login to Continue
+                Login or Sign Up
               </Link>
             </div>
           )}
         </div>
+
         <p className="text-xs text-gray-500 mt-4 text-center">
-          Payments are securely processed by our partner, Stripe.
+          Payments are securely processed by Stripe.
         </p>
       </div>
     </div>
