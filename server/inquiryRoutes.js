@@ -59,7 +59,7 @@ router.post("/", requireAuth, async (req, res) => {
     }
 
     const { data, error } = await resend.emails.send({
-      from: "Luminous Heaven Club <onboarding@resend.dev>",
+      from: "Luminous Heaven Club <inquiries@luminous-heaven.com>",
       to: [agent.email],
       subject: `New Inquiry for ${property.title}`,
       html: `
@@ -70,8 +70,8 @@ router.post("/", requireAuth, async (req, res) => {
         <p><strong>Property:</strong> ${property.title}</p>
         <p><strong>Location:</strong> ${property.city}</p>
         <p><strong>Price:</strong> $${new Intl.NumberFormat().format(
-          property.price
-        )}</p>
+        property.price
+      )}</p>
         <hr>
         <h2>Member Details</h2>
         <p><strong>Name:</strong> ${memberProfile.name}</p>
