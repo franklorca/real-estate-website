@@ -77,6 +77,7 @@ const PropertyDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeImage, setActiveImage] = useState("");
+  const [currentIndex, setCurrentIndex] = useState(0);
   const { id } = useParams();
   const { user } = useAuth();
 
@@ -89,7 +90,13 @@ const PropertyDetailPage = () => {
         const response = await api.get(`/api/properties/${id}`);
         setProperty(response.data);
         const gallery = response.data.image_gallery || [];
-        setActiveImage(gallery.length > 0 ? gallery[0] : response.data.image);
+        if (gallery.length > 0) {
+          setActiveImage(gallery[0]);
+          setCurrentIndex(0);
+        } else {
+          setActiveImage(response.data.image);
+          setCurrentIndex(0);
+        }
       } catch (err) {
         console.error("Failed to fetch property details:", err);
         setError("Could not load property details. It may have been removed.");
@@ -99,6 +106,27 @@ const PropertyDetailPage = () => {
     };
     fetchProperty();
   }, [id]);
+
+  const handleNext = () => {
+    if (!galleryImages.length) return;
+    const nextIndex = (currentIndex + 1) % galleryImages.length;
+    setCurrentIndex(nextIndex);
+    setActiveImage(galleryImages[nextIndex]);
+  };
+
+  const handlePrev = () => {
+    if (!galleryImages.length) return;
+    const prevIndex =
+      (currentIndex - 1 + galleryImages.length) % galleryImages.length;
+    setCurrentIndex(prevIndex);
+    setActiveImage(galleryImages[prevIndex]);
+  };
+
+  const handleThumbnailClick = (image, index) => {
+    setActiveImage(image);
+    setCurrentIndex(index);
+  };
+
 
   const getStatusClasses = (status) => {
     switch (status) {
@@ -151,13 +179,60 @@ const PropertyDetailPage = () => {
 
         {/* --- Image Gallery (Main image visible to all, gallery for members) --- */}
         <div className="flex flex-col gap-4 mb-16">
-          <div className="w-full h-[250px] sm:h-[400px] md:h-[550px] bg-gray-200 rounded-lg overflow-hidden shadow-2xl">
+          <div className="relative w-full h-[250px] sm:h-[400px] md:h-[550px] bg-gray-200 rounded-lg overflow-hidden shadow-2xl group">
             <img
               src={activeImage}
               alt={property.title}
               className="w-full h-full object-cover"
             />
+
+            {hasActiveMembership && galleryImages.length > 1 && (
+              <>
+                {/* Prev Button */}
+                <button
+                  onClick={handlePrev}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/30 p-3 rounded-full text-white hover:bg-black/50 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                </button>
+
+                {/* Next Button */}
+                <button
+                  onClick={handleNext}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/30 p-3 rounded-full text-white hover:bg-black/50 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </button>
+              </>
+            )}
           </div>
+
 
           {hasActiveMembership && galleryImages.length > 1 && (
             <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
@@ -165,16 +240,16 @@ const PropertyDetailPage = () => {
                 <div
                   key={index}
                   className="h-20 sm:h-24 rounded-md overflow-hidden cursor-pointer"
-                  onClick={() => setActiveImage(img)}
+                  onClick={() => handleThumbnailClick(img, index)}
                 >
+
                   <img
                     src={img}
                     alt={`${property.title} thumbnail ${index + 1}`}
-                    className={`w-full h-full object-cover transition-opacity duration-300 ${
-                      activeImage === img
+                    className={`w-full h-full object-cover transition-opacity duration-300 ${activeImage === img
                         ? "opacity-100 ring-2 ring-brand-accent"
                         : "opacity-60 hover:opacity-100"
-                    }`}
+                      }`}
                   />
                 </div>
               ))}
