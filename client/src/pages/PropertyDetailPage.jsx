@@ -127,7 +127,6 @@ const PropertyDetailPage = () => {
     setCurrentIndex(index);
   };
 
-
   const getStatusClasses = (status) => {
     switch (status) {
       case "Under Offer":
@@ -233,7 +232,6 @@ const PropertyDetailPage = () => {
             )}
           </div>
 
-
           {hasActiveMembership && galleryImages.length > 1 && (
             <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
               {galleryImages.map((img, index) => (
@@ -242,14 +240,14 @@ const PropertyDetailPage = () => {
                   className="h-20 sm:h-24 rounded-md overflow-hidden cursor-pointer"
                   onClick={() => handleThumbnailClick(img, index)}
                 >
-
                   <img
                     src={img}
                     alt={`${property.title} thumbnail ${index + 1}`}
-                    className={`w-full h-full object-cover transition-opacity duration-300 ${activeImage === img
+                    className={`w-full h-full object-cover transition-opacity duration-300 ${
+                      activeImage === img
                         ? "opacity-100 ring-2 ring-brand-accent"
                         : "opacity-60 hover:opacity-100"
-                      }`}
+                    }`}
                   />
                 </div>
               ))}
@@ -323,19 +321,13 @@ const PropertyDetailPage = () => {
             <div className="sticky top-10 space-y-8">
               <div className="bg-brand-bg-light p-6 rounded-lg shadow-sm border border-gray-200/80">
                 <p className="text-sm font-medium text-brand-light">Price</p>
-                {hasActiveMembership ? (
-                  <p className="text-4xl font-bold text-brand-dark mt-1">
-                    {new Intl.NumberFormat("en-US", {
-                      style: "currency",
-                      currency: "USD",
-                      minimumFractionDigits: 0,
-                    }).format(property.price)}
-                  </p>
-                ) : (
-                  <div className="mt-2 text-3xl font-bold text-brand-dark blur-md select-none">
-                    $8,888,888
-                  </div>
-                )}
+                <p className="text-4xl font-bold text-brand-dark mt-1">
+                  {new Intl.NumberFormat("en-US", {
+                    style: "currency",
+                    currency: "USD",
+                    minimumFractionDigits: 0,
+                  }).format(property.price)}
+                </p>
               </div>
 
               {hasActiveMembership ? (
@@ -348,10 +340,11 @@ const PropertyDetailPage = () => {
               ) : (
                 <div className="bg-brand-bg-light p-6 rounded-lg shadow-sm border border-gray-200/80 text-center">
                   <h3 className="font-serif text-xl font-semibold text-brand-dark">
-                    Unlock Agent Details
+                    Unlock Full Listing Details
                   </h3>
                   <p className="mt-2 text-brand-light">
-                    Join now to contact the agent directly.
+                    This property's full gallery and agent info are reserved for
+                    members.
                   </p>
                   <Link
                     to={user ? "/pricing" : "/login?redirect=/pricing"}

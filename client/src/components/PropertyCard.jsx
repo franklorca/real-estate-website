@@ -115,17 +115,11 @@ const PropertyCard = ({ property, onUnsave }) => {
         <p className="font-sans text-brand-light mb-4">{property.city}</p>
 
         <div className="flex justify-between items-center border-t border-gray-200/80 pt-4">
-          {user && user.membership_status === "active" ? (
-            <span className="font-sans text-xl font-bold text-brand-dark">
-              {formattedPrice}
-            </span>
-          ) : (
-            <span className="font-sans text-xl font-semibold text-brand-dark blur-sm select-none">
-              $8,888,888
-            </span>
-          )}
+          <span className="font-sans text-xl font-bold text-brand-dark">
+            {formattedPrice}
+          </span>
           <div className="font-sans text-sm text-brand-light">
-            <span>{property.bedrooms} Beds</span> &middot;{" "}
+            <span>{property.bedrooms} Beds</span> ·{" "}
             <span>{property.bathrooms} Baths</span>
           </div>
         </div>
@@ -136,7 +130,7 @@ const PropertyCard = ({ property, onUnsave }) => {
               to={user ? "/pricing" : "/signup"}
               className="block w-full text-center bg-brand-accent text-white py-2.5 rounded-md font-semibold hover:bg-brand-dark transition-colors"
             >
-              {user ? "Upgrade to View Price" : "Join to Unlock Price"}
+              {user ? "Upgrade to View More" : "Join to Unlock More"}
             </Link>
           </div>
         )}
