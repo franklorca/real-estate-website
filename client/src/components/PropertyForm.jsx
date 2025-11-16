@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import api from "../services/api";
 import { toast } from "react-toastify";
+import ImageUpload from "./ImageUpload";
 
 const PropertyForm = ({ initialData = {}, onSubmit, buttonText }) => {
   // --- STATE MANAGEMENT ---
@@ -19,7 +20,7 @@ const PropertyForm = ({ initialData = {}, onSubmit, buttonText }) => {
     listing_type: "For Sale",
     agent_id: "",
   });
-  const [gallery, setGallery] = useState([""]);
+  const [gallery, setGallery] = useState([]);
   const [agents, setAgents] = useState([]);
 
   // --- EFFECTS ---
@@ -65,7 +66,8 @@ const PropertyForm = ({ initialData = {}, onSubmit, buttonText }) => {
       setGallery(
         Array.isArray(initialGallery) && initialGallery.length > 0
           ? initialGallery
-          : [""]
+          : // --- (FIX 2: Changed fallback from [""] to []) ---
+            []
       );
     }
   }, [initialData]);
@@ -75,30 +77,43 @@ const PropertyForm = ({ initialData = {}, onSubmit, buttonText }) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleGalleryChange = (index, value) => {
-    const newGallery = [...gallery];
-    newGallery[index] = value;
-    setGallery(newGallery);
+  /**
+   * Handles success from the MAIN <ImageUpload> component.
+   * Also used by the "Remove Image" button (by passing an empty string).
+   */
+  const handleMainImageUpload = (url) => {
+    setFormData((prev) => ({ ...prev, image: url }));
   };
 
-  const addGalleryField = () => {
-    setGallery([...gallery, ""]);
+  /**
+   * Handles success from the GALLERY <ImageUpload> component.
+   * Adds the new URL to the gallery array.
+   */
+  const handleGalleryImageUpload = (url) => {
+    setGallery((prev) => [...prev, url]);
   };
 
-  const removeGalleryField = (index) => {
-    if (gallery.length > 1) {
-      setGallery(gallery.filter((_, i) => i !== index));
-    } else {
-      // If it's the last field, just clear it instead of removing it
-      setGallery([""]);
-    }
+  /**
+   * Replaces old 'removeGalleryField'.
+   * Called by the 'X' button on gallery preview images.
+   */
+  const removeGalleryImage = (indexToRemove) => {
+    setGallery((prev) => prev.filter((_, i) => i !== indexToRemove));
   };
 
+  // --- (FIX 5: Updated handleSubmit to use the clean 'gallery' array) ---
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (!formData.image) {
+      toast.error("Please add a main (featured) image.");
+      return;
+    }
+
     const finalData = {
       ...formData,
-      image_gallery: JSON.stringify(gallery.filter((url) => url.trim() !== "")),
+      // 'gallery' is now a clean array, no filtering needed.
+      image_gallery: JSON.stringify(gallery),
     };
     onSubmit(finalData);
   };
@@ -231,15 +246,33 @@ const PropertyForm = ({ initialData = {}, onSubmit, buttonText }) => {
         rows="6"
         className="w-full p-2 border rounded"
       />
-      <input
-        type="text"
-        name="image"
-        value={formData.image}
-        onChange={handleChange}
-        placeholder="Main Image URL (Featured)"
-        required
-        className="w-full p-2 border rounded"
-      />
+      {/* --- MAIN IMAGE UPLOAD --- */}
+      <div>
+        <label className="block text-sm font-medium text-brand-dark">
+          Main Image (Featured)
+        </label>
+
+        {/* If an image is already uploaded, show it */}
+        {formData.image ? (
+          <div className="mt-2">
+            <img
+              src={formData.image}
+              alt="Main preview"
+              className="w-full max-w-xs h-auto rounded border"
+            />
+            <button
+              type="button"
+              onClick={() => handleMainImageUpload("")} // Function to clear the image
+              className="mt-2 text-sm text-red-600 hover:text-red-800"
+            >
+              Remove Image
+            </button>
+          </div>
+        ) : (
+          // If no image, show the upload component
+          <ImageUpload onUploadSuccess={handleMainImageUpload} />
+        )}
+      </div>
       <input
         type="text"
         name="video_url"
@@ -258,35 +291,43 @@ const PropertyForm = ({ initialData = {}, onSubmit, buttonText }) => {
       />
 
       {/* --- DYNAMIC IMAGE GALLERY --- */}
+      {/* --- IMAGE GALLERY UPLOAD --- */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Image Gallery URLs
+          Image Gallery
         </label>
-        {gallery.map((url, index) => (
-          <div key={index} className="flex items-center mb-2">
-            <input
-              type="text"
-              value={url}
-              onChange={(e) => handleGalleryChange(index, e.target.value)} // Correctly calls the handler
-              placeholder={`Image URL ${index + 1}`}
-              className="flex-grow p-2 border rounded-l"
-            />
-            <button
-              type="button"
-              onClick={() => removeGalleryField(index)} // Correctly calls the handler
-              className="px-3 py-2 bg-red-500 text-white rounded-r hover:bg-red-600"
-            >
-              X
-            </button>
-          </div>
-        ))}
-        <button
-          type="button"
-          onClick={addGalleryField} // Correctly calls the handler
-          className="mt-2 text-sm text-indigo-600 hover:text-indigo-800"
-        >
-          + Add Another Image
-        </button>
+
+        {/* 1. The Preview Area: Show uploaded images */}
+        <div className="flex flex-wrap gap-4 p-4 border rounded mb-4">
+          {gallery.length === 0 && (
+            <p className="text-sm text-gray-500">
+              No gallery images uploaded yet.
+            </p>
+          )}
+
+          {gallery.map((url, index) => (
+            <div key={index} className="relative w-32 h-32">
+              <img
+                src={url}
+                alt={`Gallery ${index + 1}`}
+                className="w-full h-full object-cover rounded"
+              />
+              <button
+                type="button"
+                onClick={() => removeGalleryImage(index)} // Use your remove function
+                className="absolute top-0 right-0 m-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold hover:bg-red-600"
+              >
+                X
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {/* 2. The Upload Area: Add new images */}
+        <ImageUpload onUploadSuccess={handleGalleryImageUpload} />
+        <p className="text-xs text-gray-500 mt-1">
+          Each successful upload will be added to the gallery.
+        </p>
       </div>
 
       <button
