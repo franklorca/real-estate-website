@@ -34,7 +34,7 @@ const Navbar = () => {
             to="/listings?listing_type=Vacation+Rental"
             className="hover:underline"
           >
-            Exclusive Stays
+            Rentals
           </Link>
           {user ? (
             <>
@@ -96,7 +96,7 @@ const Navbar = () => {
             to="/listings?listing_type=Vacation+Rental"
             className="block py-2 text-center hover:bg-gray-700 rounded"
           >
-            Exclusive Stays
+            Rentals
           </Link>
           {user ? (
             <>
