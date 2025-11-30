@@ -176,7 +176,7 @@ const PropertyDetailPage = () => {
           </div>
         </div>
 
-        {/* --- Image Gallery (Main image visible to all, gallery for members) --- */}
+        {/* --- Image Gallery (Available to all) --- */}
         <div className="flex flex-col gap-4 mb-16">
           <div className="relative w-full h-[250px] sm:h-[400px] md:h-[550px] bg-gray-200 rounded-lg overflow-hidden shadow-2xl group">
             <img
@@ -185,7 +185,7 @@ const PropertyDetailPage = () => {
               className="w-full h-full object-cover"
             />
 
-            {hasActiveMembership && galleryImages.length > 1 && (
+            {galleryImages.length > 1 && (
               <>
                 {/* Prev Button */}
                 <button
@@ -232,7 +232,7 @@ const PropertyDetailPage = () => {
             )}
           </div>
 
-          {hasActiveMembership && galleryImages.length > 1 && (
+          {galleryImages.length > 1 && (
             <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
               {galleryImages.map((img, index) => (
                 <div
@@ -343,8 +343,7 @@ const PropertyDetailPage = () => {
                     Unlock Full Listing Details
                   </h3>
                   <p className="mt-2 text-brand-light">
-                    This property's full gallery and agent info are reserved for
-                    members.
+                    Agent contact information is reserved for members.
                   </p>
                   <Link
                     to={user ? "/pricing" : "/login?redirect=/pricing"}
