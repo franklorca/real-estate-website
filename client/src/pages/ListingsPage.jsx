@@ -60,9 +60,9 @@ const ListingsPage = () => {
       title =
         filters.listing_type === "For Sale"
           ? "Homes for Sale"
-          : "Exclusive Stays";
+          : "Exclusive Rentals";
       subtitle = `Browse our curated collection of ${
-        filters.listing_type === "For Sale" ? "homes" : "stays"
+        filters.listing_type === "For Sale" ? "homes" : "Rentals"
       }.`;
     }
 

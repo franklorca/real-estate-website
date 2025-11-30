@@ -84,7 +84,7 @@ const Hero = () => {
           className="font-sans mt-6 text-lg sm:text-xl max-w-2xl mx-auto opacity-90"
           style={{ textShadow: "0 1px 10px rgba(0,0,0,0.5)" }}
         >
-          Your Gateway to Extraordinary Living and Exclusive Stays.
+          Your Gateway to Extraordinary Living and Exclusive Rentals.
         </motion.p>
 
         <motion.div

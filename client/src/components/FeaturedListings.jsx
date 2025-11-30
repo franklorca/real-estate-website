@@ -1,5 +1,6 @@
 // client/src/components/FeaturedListings.jsx
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import api from "../services/api";
 import PropertyCard from "./PropertyCard";
 
@@ -50,6 +51,16 @@ const FeaturedListings = () => {
           </p>
         </div>
         <div className="mt-20">{renderContent()}</div>
+        {!loading && !error && properties.length > 0 && (
+          <div className="mt-16 text-center">
+            <Link
+              to="/listings"
+              className="inline-block font-sans bg-brand-accent text-white font-semibold py-3 px-8 rounded-md text-base uppercase tracking-wider transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+            >
+              See All Listings
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );

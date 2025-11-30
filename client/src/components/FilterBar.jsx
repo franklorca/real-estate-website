@@ -98,7 +98,7 @@ const FilterBar = ({ onFilterChange, initialFilters = {} }) => {
           >
             <option value="">All</option>
             <option value="For Sale">For Sale</option>
-            <option value="Vacation Rental">Stay</option>
+            <option value="Vacation Rental">Rental</option>
           </select>
         </div>
 
