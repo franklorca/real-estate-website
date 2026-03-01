@@ -35,13 +35,18 @@ export default async function handler(req, res) {
         }
     }
 
-    // 4. Read the raw HTML file from the built /dist folder
-    const htmlPath = path.join(process.cwd(), 'dist', 'index.html');
+    // 4. Read the raw HTML via a loopback request to the homepage
+    const protocol = req.headers['x-forwarded-proto'] || 'https';
+    const host = req.headers.host;
+    const baseUrl = `${protocol}://${host}`;
+
     let html = '';
     try {
-        html = fs.readFileSync(htmlPath, 'utf8');
+        // Fetch the root '/' which Vercel statically serves as index.html
+        const htmlResponse = await axios.get(`${baseUrl}/`);
+        html = htmlResponse.data;
     } catch (e) {
-        console.error("Failed to read static index.html", e);
+        console.error("Failed to read static index.html via loopback", e.message);
         return res.status(500).send("Internal Server Error: Missing index.html");
     }
 
