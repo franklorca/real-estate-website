@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/properties/(.*)",
+      "destination": "/api/seo-injector"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
