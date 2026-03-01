@@ -37,7 +37,7 @@ function App() {
           <Route path="/" element={<Layout />}>
             <Route index element={<HomePage />} />
             <Route path="listings" element={<ListingsPage />} />
-            <Route path="properties/:id" element={<PropertyDetailPage />} />
+            <Route path="properties/:identifier" element={<PropertyDetailPage />} />
             <Route path="pricing" element={<PricingPage />} />
             <Route path="/payment/success" element={<PaymentSuccessPage />} />
           </Route>

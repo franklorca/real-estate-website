@@ -7,6 +7,7 @@ import FilterBar from "../components/FilterBar";
 import PropertyCardSkeleton from "../components/PropertyCardSkeleton";
 import Masonry from "react-masonry-css";
 import { motion, AnimatePresence } from "framer-motion";
+import SEO from "../components/SEO";
 
 const ListingsPage = () => {
   const [properties, setProperties] = useState([]);
@@ -61,9 +62,8 @@ const ListingsPage = () => {
         filters.listing_type === "For Sale"
           ? "Homes for Sale"
           : "Exclusive Rentals";
-      subtitle = `Browse our curated collection of ${
-        filters.listing_type === "For Sale" ? "homes" : "Rentals"
-      }.`;
+      subtitle = `Browse our curated collection of ${filters.listing_type === "For Sale" ? "homes" : "Rentals"
+        }.`;
     }
 
     if (!loading && properties.length === 0) {
@@ -104,6 +104,10 @@ const ListingsPage = () => {
 
   return (
     <div className="bg-brand-bg-light min-h-screen">
+      <SEO
+        title="Properties & Rentals"
+        description="Browse our curated collection of exclusive properties for sale and luxury vacation rentals."
+      />
       <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
         {renderHeader()}
         <FilterBar

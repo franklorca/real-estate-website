@@ -1,9 +1,11 @@
 // client/src/pages/PropertyDetailPage.jsx
 import React, { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import AgentProfile from "../components/AgentProfile";
+import { generateSmartSlug, decodeId, isValidHashId } from "../utils/slugify";
+import SEO from "../components/SEO";
 
 // --- Helper Components ---
 
@@ -78,7 +80,30 @@ const PropertyDetailPage = () => {
   const [error, setError] = useState("");
   const [activeImage, setActiveImage] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
-  const { id } = useParams();
+  const { identifier } = useParams();
+
+  // Resolve ID from identifier safely
+  let resolvedId = null;
+  const isStrictlyNumeric = /^\d+$/.test(identifier);
+
+  const parts = identifier ? identifier.split("-") : [];
+  const lastPart = parts.length > 0 ? parts[parts.length - 1] : "";
+
+  if (isStrictlyNumeric) {
+    // 1. Strictly a legacy numerical ID (e.g. /properties/12)
+    resolvedId = identifier;
+  } else if (lastPart && isValidHashId(lastPart)) {
+    // 2. Contains a rigorously verifiable Smart UID hash (e.g. 11901-swearingen-dr-e4R)
+    resolvedId = decodeId(lastPart);
+  } else {
+    // 3. Fallback to legacy ID + old slug format (e.g. /properties/12-beautiful-villa)
+    const legacyMatch = identifier?.match(/^(\d+)/);
+    if (legacyMatch) {
+      resolvedId = legacyMatch[1];
+    }
+  }
+
+  const navigate = useNavigate();
   const { user } = useAuth();
 
   const hasActiveMembership = user && user.membership_status === "active";
@@ -87,14 +112,22 @@ const PropertyDetailPage = () => {
     const fetchProperty = async () => {
       try {
         setLoading(true);
-        const response = await api.get(`/api/properties/${id}`);
-        setProperty(response.data);
-        const gallery = response.data.image_gallery || [];
+        const response = await api.get(`/api/properties/${resolvedId}`);
+        const fetchedProperty = response.data;
+        setProperty(fetchedProperty);
+
+        // --- Redirect to canonical Smart Slug if needed ---
+        const expectedIdentifier = generateSmartSlug(fetchedProperty.id, fetchedProperty.title);
+        if (identifier !== expectedIdentifier) {
+          navigate(`/properties/${expectedIdentifier}`, { replace: true });
+        }
+
+        const gallery = fetchedProperty.image_gallery || [];
         if (gallery.length > 0) {
           setActiveImage(gallery[0]);
           setCurrentIndex(0);
         } else {
-          setActiveImage(response.data.image);
+          setActiveImage(fetchedProperty.image);
           setCurrentIndex(0);
         }
       } catch (err) {
@@ -104,8 +137,14 @@ const PropertyDetailPage = () => {
         setLoading(false);
       }
     };
-    fetchProperty();
-  }, [id]);
+
+    if (resolvedId) {
+      fetchProperty();
+    } else {
+      setLoading(false);
+      setError("Invalid property link.");
+    }
+  }, [resolvedId, identifier, navigate]);
 
   const handleNext = () => {
     if (!galleryImages.length) return;
@@ -149,6 +188,12 @@ const PropertyDetailPage = () => {
 
   return (
     <div className="bg-brand-bg-white">
+      <SEO
+        title={property.title}
+        description={`Beautiful ${property.bedrooms} bed, ${property.bathrooms} bath property in ${property.city}. ${property.description ? property.description.substring(0, 120) + '...' : ''}`}
+        image={activeImage || property.image}
+        type="article"
+      />
       <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
         {/* --- Editorial Header (Visible to all) --- */}
         <div className="lg:flex lg:items-center lg:justify-between mb-8 pb-8 border-b border-brand-divider">
@@ -243,11 +288,10 @@ const PropertyDetailPage = () => {
                   <img
                     src={img}
                     alt={`${property.title} thumbnail ${index + 1}`}
-                    className={`w-full h-full object-cover transition-opacity duration-300 ${
-                      activeImage === img
-                        ? "opacity-100 ring-2 ring-brand-accent"
-                        : "opacity-60 hover:opacity-100"
-                    }`}
+                    className={`w-full h-full object-cover transition-opacity duration-300 ${activeImage === img
+                      ? "opacity-100 ring-2 ring-brand-accent"
+                      : "opacity-60 hover:opacity-100"
+                      }`}
                   />
                 </div>
               ))}

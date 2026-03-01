@@ -3,11 +3,13 @@ import React from "react";
 import { Outlet } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+import SEO from "./SEO";
 
 const Layout = () => {
   return (
     // The main wrapper for the entire page layout
     <div className="relative min-h-screen">
+      <SEO />
       <Navbar />
       <main>
         {/* The Outlet will render our page components like HomePage */}

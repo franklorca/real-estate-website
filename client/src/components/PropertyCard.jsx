@@ -3,6 +3,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
+import { generateSmartSlug } from "../utils/slugify";
 
 // --- NEW BOOKMARK ICON ---
 const BookmarkIcon = ({ isSaved }) => (
@@ -13,9 +14,8 @@ const BookmarkIcon = ({ isSaved }) => (
     fill={isSaved ? "currentColor" : "none"}
     stroke="currentColor"
     strokeWidth="2"
-    className={`w-6 h-6 transition-all duration-300 ${
-      isSaved ? "text-brand-accent" : "text-white"
-    }`}
+    className={`w-6 h-6 transition-all duration-300 ${isSaved ? "text-brand-accent" : "text-white"
+      }`}
   >
     <path
       strokeLinecap="round"
@@ -70,7 +70,7 @@ const PropertyCard = ({ property, onUnsave }) => {
     >
       <div className="relative">
         <Link
-          to={`/properties/${property.id}`}
+          to={`/properties/${generateSmartSlug(property.id, property.title)}`}
           className="block h-64 w-full overflow-hidden"
         >
           <img
@@ -107,7 +107,7 @@ const PropertyCard = ({ property, onUnsave }) => {
       </div>
 
       <div className="p-6">
-        <Link to={`/properties/${property.id}`} className="block">
+        <Link to={`/properties/${generateSmartSlug(property.id, property.title)}`} className="block">
           <h3 className="font-serif text-2xl font-semibold text-brand-dark mb-1 truncate group-hover:text-brand-accent transition-colors">
             {property.title}
           </h3>
