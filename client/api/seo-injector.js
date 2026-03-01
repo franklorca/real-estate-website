@@ -80,8 +80,8 @@ export default async function handler(req, res) {
           <meta name="twitter:image" content="${image}">
         `;
 
-                // Replace the default title with our custom massive block
-                html = html.replace('<title>Luminous Heaven</title>', customTags);
+                // Replace the default static SEO block with our custom massive block
+                html = html.replace(/<!-- SEO_INJECT_START -->[\s\S]*<!-- SEO_INJECT_END -->/, customTags);
             }
         } catch (apiError) {
             console.error(`Failed to fetch property ${propertyId} for OG injection:`, apiError.message);
