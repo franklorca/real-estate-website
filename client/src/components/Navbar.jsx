@@ -11,48 +11,58 @@ const Navbar = () => {
   const isHomePage = location.pathname === "/";
   const navClasses = isHomePage
     ? "absolute bg-transparent text-white"
-    : "relative bg-gray-900 text-white";
+    : "sticky bg-white/90 backdrop-blur-md text-brand-dark border-b border-brand-divider/50 shadow-sm";
 
-  const genericHamburgerLine = `h-1 w-6 my-1 rounded-full bg-white transition ease transform duration-300`;
+  const genericHamburgerLine = `h-[2px] w-6 my-1 rounded-full ${isHomePage ? "bg-white" : "bg-brand-dark"} transition ease transform duration-300`;
 
   return (
     <header className={`${navClasses} top-0 left-0 w-full z-50 p-4 md:p-6`}>
       <nav className="max-w-7xl mx-auto flex justify-between items-center">
-        <Link to="/" className="text-2xl font-bold">
+        <Link to="/" className="font-serif text-2xl md:text-3xl font-bold tracking-wider uppercase">
           Luminous Heaven
         </Link>
 
         {/* Desktop Menu */}
-        <div className="hidden md:flex space-x-8 items-center">
+        <div className="hidden md:flex space-x-10 items-center font-sans text-[13px] uppercase tracking-[0.1em]">
           <Link
             to="/listings?listing_type=For+Sale"
-            className="hover:underline"
+            className="relative after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-0 after:bg-brand-accent after:transition-all after:duration-300 hover:after:w-full"
           >
             Homes for Sale
           </Link>
           <Link
             to="/listings?listing_type=Vacation+Rental"
-            className="hover:underline"
+            className="relative after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-0 after:bg-brand-accent after:transition-all after:duration-300 hover:after:w-full"
           >
             Rentals
           </Link>
+          <Link
+            to="/blog"
+            className="relative after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-0 after:bg-brand-accent after:transition-all after:duration-300 hover:after:w-full"
+          >
+            Journal
+          </Link>
           {user ? (
             <>
-              <Link to="/dashboard" className="font-semibold hover:underline">
+              <Link to="/dashboard" className="relative font-medium after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-0 after:bg-brand-accent after:transition-all after:duration-300 hover:after:w-full">
                 Dashboard
               </Link>
-              <button onClick={logOut} className="hover:underline">
+              <button onClick={logOut} className="relative after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-0 after:bg-brand-accent after:transition-all after:duration-300 hover:after:w-full">
                 Logout
               </button>
             </>
           ) : (
             <>
-              <Link to="/login" className="hover:underline">
+              <Link to="/login" className="relative after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-0 after:bg-brand-accent after:transition-all after:duration-300 hover:after:w-full">
                 Login
               </Link>
               <Link
                 to="/pricing"
-                className="bg-white text-gray-900 px-4 py-2 rounded-md font-semibold hover:bg-gray-200 transition-colors"
+                className={`px-5 py-2 rounded-sm font-medium transition-colors duration-300 ${
+                  isHomePage 
+                    ? "bg-white text-brand-dark hover:bg-brand-champagne" 
+                    : "bg-brand-accent text-white hover:bg-brand-accent-hover"
+                }`}
               >
                 Join Now
               </Link>
@@ -97,6 +107,12 @@ const Navbar = () => {
             className="block py-2 text-center hover:bg-gray-700 rounded"
           >
             Rentals
+          </Link>
+          <Link
+            to="/blog"
+            className="block py-2 text-center hover:bg-gray-700 rounded"
+          >
+            Journal
           </Link>
           {user ? (
             <>

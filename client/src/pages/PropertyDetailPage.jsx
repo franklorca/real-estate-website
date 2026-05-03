@@ -6,6 +6,7 @@ import { useAuth } from "../context/AuthContext";
 import AgentProfile from "../components/AgentProfile";
 import { generateSmartSlug, decodeId, isValidHashId } from "../utils/slugify";
 import SEO from "../components/SEO";
+import { motion, AnimatePresence } from "framer-motion";
 
 // --- Helper Components ---
 
@@ -124,10 +125,8 @@ const PropertyDetailPage = () => {
 
         const gallery = fetchedProperty.image_gallery || [];
         if (gallery.length > 0) {
-          setActiveImage(gallery[0]);
           setCurrentIndex(0);
         } else {
-          setActiveImage(fetchedProperty.image);
           setCurrentIndex(0);
         }
       } catch (err) {
@@ -221,94 +220,152 @@ const PropertyDetailPage = () => {
           </div>
         </div>
 
-        {/* --- Image Gallery (Available to all) --- */}
-        <div className="flex flex-col gap-4 mb-16">
-          <div className="relative w-full h-[250px] sm:h-[400px] md:h-[550px] bg-gray-200 rounded-lg overflow-hidden shadow-2xl group">
-            <img
-              src={activeImage}
-              alt={property.title}
-              className="w-full h-full object-cover"
-            />
-
-            {galleryImages.length > 1 && (
-              <>
-                {/* Prev Button */}
-                <button
-                  onClick={handlePrev}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/30 p-3 rounded-full text-white hover:bg-black/50 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 19l-7-7 7-7"
-                    />
-                  </svg>
-                </button>
-
-                {/* Next Button */}
-                <button
-                  onClick={handleNext}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/30 p-3 rounded-full text-white hover:bg-black/50 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </button>
-              </>
-            )}
-          </div>
-
-          {galleryImages.length > 1 && (
-            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
-              {galleryImages.map((img, index) => (
-                <div
-                  key={index}
-                  className="h-20 sm:h-24 rounded-md overflow-hidden cursor-pointer"
-                  onClick={() => handleThumbnailClick(img, index)}
-                >
+        {/* --- Responsive Editorial Gallery --- */}
+        <div className="mb-16">
+          {/* Mobile: Edge-to-Edge Snap Carousel */}
+          <div className="md:hidden -mx-4 sm:-mx-6 relative h-[60vh] overflow-hidden group">
+            <div className="flex overflow-x-auto snap-x snap-mandatory h-full hide-scrollbar scroll-smooth">
+              {galleryImages.map((img, idx) => (
+                <div key={idx} className="min-w-full h-full snap-center relative shrink-0">
                   <img
                     src={img}
-                    alt={`${property.title} thumbnail ${index + 1}`}
-                    className={`w-full h-full object-cover transition-opacity duration-300 ${activeImage === img
-                      ? "opacity-100 ring-2 ring-brand-accent"
-                      : "opacity-60 hover:opacity-100"
-                      }`}
+                    alt={`${property.title} - Image ${idx + 1}`}
+                    className="w-full h-full object-cover"
                   />
+                  {/* Subtle gradient for text readability if needed */}
+                  <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/50 to-transparent pointer-events-none" />
                 </div>
               ))}
             </div>
-          )}
+            {/* Pill Indicator */}
+            {galleryImages.length > 1 && (
+              <div className="absolute bottom-6 right-6 bg-white/90 backdrop-blur-md px-4 py-1.5 rounded-full shadow-lg z-10 pointer-events-none">
+                <span className="font-sans text-[10px] font-bold tracking-[0.2em] text-brand-dark uppercase">
+                  Swipe Gallery
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Desktop: Staggered Mosaic Grid */}
+          <div className="hidden md:grid grid-cols-12 gap-4 h-[650px]">
+            {/* Primary Massive Image */}
+            <div 
+              className={`h-full overflow-hidden relative group cursor-pointer ${galleryImages.length > 1 ? 'col-span-8' : 'col-span-12'}`}
+              onClick={() => handleThumbnailClick(galleryImages[0], 0)}
+            >
+              <img
+                src={galleryImages[0] || property.image}
+                alt={property.title}
+                className="w-full h-full object-cover transition-transform duration-[1.5s] ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-105"
+              />
+            </div>
+
+            {/* Secondary Stacked Images */}
+            {galleryImages.length > 1 && (
+              <div className="col-span-4 flex flex-col gap-4 h-full">
+                {galleryImages[1] && (
+                  <div 
+                    className={`overflow-hidden relative group cursor-pointer ${galleryImages.length > 2 ? 'h-1/2' : 'h-full'}`}
+                    onClick={() => handleThumbnailClick(galleryImages[1], 1)}
+                  >
+                    <img
+                      src={galleryImages[1]}
+                      alt={`${property.title} secondary`}
+                      className="w-full h-full object-cover transition-transform duration-[1.5s] ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-105"
+                    />
+                  </div>
+                )}
+                {galleryImages[2] && (
+                  <div 
+                    className="h-1/2 overflow-hidden relative group cursor-pointer"
+                    onClick={() => handleThumbnailClick(galleryImages[2], 2)}
+                  >
+                    <img
+                      src={galleryImages[2]}
+                      alt={`${property.title} tertiary`}
+                      className="w-full h-full object-cover transition-transform duration-[1.5s] ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-105"
+                    />
+                    {galleryImages.length > 3 && (
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center transition-colors group-hover:bg-black/60 backdrop-blur-sm">
+                        <span className="text-white font-sans text-[11px] font-bold tracking-[0.2em] uppercase">
+                          + {galleryImages.length - 3} More Photos
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
+
+        {/* Minimalist Lightbox Modal */}
+        <AnimatePresence>
+          {activeImage && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex flex-col items-center justify-center p-4 sm:p-8"
+            >
+              <button
+                onClick={() => setActiveImage("")}
+                className="absolute top-6 right-6 text-white/50 hover:text-white transition-colors p-2 z-50"
+              >
+                <span className="font-sans text-[11px] uppercase tracking-[0.2em] font-bold">Close</span>
+              </button>
+
+              <div className="relative w-full max-w-6xl max-h-[85vh] flex items-center justify-center">
+                <img
+                  src={activeImage}
+                  alt="Enlarged property view"
+                  className="max-w-full max-h-[85vh] object-contain shadow-2xl"
+                />
+                
+                {galleryImages.length > 1 && (
+                  <>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handlePrev(); }}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 p-4 rounded-full text-white backdrop-blur-md transition-all"
+                    >
+                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" /></svg>
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleNext(); }}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 p-4 rounded-full text-white backdrop-blur-md transition-all"
+                    >
+                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" /></svg>
+                    </button>
+                  </>
+                )}
+              </div>
+
+              <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
+                <span className="text-white/50 font-sans text-[10px] uppercase tracking-[0.3em]">
+                  {currentIndex + 1} / {galleryImages.length}
+                </span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* --- Main Content Grid --- */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-16">
           {/* --- Left Column - Details --- */}
           <div className="lg:col-span-2">
             <section>
-              <h2 className="font-serif text-3xl font-semibold text-brand-dark">
-                Property Description
+              <h2 className="font-serif text-3xl font-semibold text-brand-dark mb-8">
+                The Narrative
               </h2>
-              <div className="mt-4 prose max-w-none text-brand-light leading-relaxed">
-                <p>{property.description}</p>
+              <div className="prose max-w-none">
+                {property.description?.split('\n').map((para, idx) => (
+                  para.trim() && (
+                    <p key={idx} className="font-sans text-brand-light text-lg leading-[1.8] mb-6 last:mb-0">
+                      {para}
+                    </p>
+                  )
+                ))}
               </div>
             </section>
 

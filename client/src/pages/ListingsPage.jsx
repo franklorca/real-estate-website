@@ -5,13 +5,12 @@ import api from "../services/api";
 import PropertyCard from "../components/PropertyCard";
 import FilterBar from "../components/FilterBar";
 import PropertyCardSkeleton from "../components/PropertyCardSkeleton";
-import Masonry from "react-masonry-css";
 import { motion, AnimatePresence } from "framer-motion";
 import SEO from "../components/SEO";
 
 const ListingsPage = () => {
   const [properties, setProperties] = useState([]);
-  const [loading, setLoading] = useState(true); // <-- Corrected line
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   const location = useLocation();
@@ -26,7 +25,6 @@ const ListingsPage = () => {
       setLoading(true);
       setError("");
       const queryParams = new URLSearchParams(filters).toString();
-      // Simulate a slightly longer load time to see the skeleton effect
       await new Promise((res) => setTimeout(res, 500));
       const response = await api.get(`/api/properties?${queryParams}`);
       setProperties(response.data);
@@ -72,16 +70,16 @@ const ListingsPage = () => {
     }
 
     return (
-      <div className="text-center border-b border-brand-divider pb-8 mb-8">
+      <div className="text-center border-b border-brand-divider/30 pb-12 mb-16">
         <motion.h1
           key={title}
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="font-serif text-4xl font-bold tracking-tight text-brand-dark sm:text-6xl"
+          className="font-serif text-5xl font-medium tracking-tight text-brand-dark sm:text-7xl"
         >
           {title}
         </motion.h1>
-        <p className="mt-4 max-w-2xl mx-auto text-lg text-brand-light">
+        <p className="mt-6 max-w-2xl mx-auto text-lg text-brand-light font-sans tracking-wide">
           {subtitle}
         </p>
       </div>
@@ -89,17 +87,13 @@ const ListingsPage = () => {
   };
 
   const renderSkeleton = () => (
-    <Masonry
-      breakpointCols={{ default: 3, 1024: 2, 640: 1 }}
-      className="flex w-auto -ml-8"
-      columnClassName="pl-8 bg-clip-padding"
-    >
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-16">
       {Array.from({ length: 6 }).map((_, index) => (
-        <div key={index} className="mb-8">
+        <div key={index} className={index % 4 === 0 ? "lg:col-span-2" : "col-span-1"}>
           <PropertyCardSkeleton />
         </div>
       ))}
-    </Masonry>
+    </div>
   );
 
   return (
@@ -108,12 +102,15 @@ const ListingsPage = () => {
         title="Properties & Rentals"
         description="Browse our curated collection of exclusive properties for sale and luxury vacation rentals."
       />
-      <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1400px] mx-auto py-24 px-6 lg:px-12">
         {renderHeader()}
-        <FilterBar
-          onFilterChange={handleFilterChange}
-          initialFilters={getFiltersFromQuery()}
-        />
+        
+        <div className="mb-16">
+          <FilterBar
+            onFilterChange={handleFilterChange}
+            initialFilters={getFiltersFromQuery()}
+          />
+        </div>
 
         <AnimatePresence mode="wait">
           <motion.div
@@ -126,31 +123,31 @@ const ListingsPage = () => {
             {loading ? (
               renderSkeleton()
             ) : properties.length > 0 ? (
-              <Masonry
-                breakpointCols={{ default: 3, 1024: 2, 640: 1 }}
-                className="flex w-auto -ml-8"
-                columnClassName="pl-8 bg-clip-padding"
-              >
-                {properties.map((property) => (
-                  <motion.div
-                    key={property.id}
-                    className="mb-8"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <PropertyCard property={property} />
-                  </motion.div>
-                ))}
-              </Masonry>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-16 gap-x-8 lg:gap-x-12">
+                {properties.map((property, index) => {
+                  // Make every 4th item span 2 columns on desktop to create a dynamic Bento grid
+                  const isLarge = index % 4 === 0;
+                  return (
+                    <motion.div
+                      key={property.id}
+                      className={isLarge ? "lg:col-span-2" : "col-span-1"}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, margin: "-50px" }}
+                      transition={{ duration: 0.6, delay: 0.1 * (index % 3) }}
+                    >
+                      <PropertyCard property={property} isLarge={isLarge} />
+                    </motion.div>
+                  );
+                })}
+              </div>
             ) : (
-              <div className="text-center py-20 px-6 bg-brand-bg-white rounded-lg shadow-md border border-gray-200/80">
-                <h3 className="font-serif text-2xl font-semibold text-brand-dark">
+              <div className="text-center py-32 px-6 bg-brand-bg border border-brand-divider/30">
+                <h3 className="font-serif text-3xl font-medium text-brand-dark mb-4">
                   No Properties Found
                 </h3>
-                <p className="mt-2 text-brand-light">
-                  Please try adjusting your filters or clearing them to see all
-                  listings.
+                <p className="font-sans text-brand-light uppercase tracking-widest text-sm">
+                  Please try adjusting your filters or clearing them to see all listings.
                 </p>
               </div>
             )}

@@ -10,6 +10,7 @@ const inquiryRoutes = require("./inquiryRoutes");
 const adminRoutes = require("./adminRoutes");
 const paymentRoutes = require("./paymentRoutes");
 const cloudinaryRoutes = require("./cloudinaryRoutes");
+const blogRoutes = require("./blogRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -30,6 +31,7 @@ app.use("/api/inquiries", inquiryRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/cloudinary", cloudinaryRoutes);
+app.use("/api/blogs", blogRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

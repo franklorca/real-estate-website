@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route } from "react-router-dom";
+import { Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -8,6 +8,8 @@ import Layout from "./components/Layout";
 import AdminLayout from "./components/AdminLayout";
 import AdminRoute from "./components/AdminRoute";
 import MemberRoute from "./components/MemberRoute";
+import AnimatedRoutes from "./components/AnimatedRoutes";
+import ScrollToTop from "./components/ScrollToTop";
 
 // Page Components
 import HomePage from "./pages/HomePage";
@@ -27,12 +29,18 @@ import AdminUsersPage from "./pages/AdminUsersPage";
 import EditUserPage from "./pages/EditUserPage";
 import PricingPage from "./pages/PricingPage";
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
+import BlogListPage from "./pages/BlogListPage";
+import BlogDetailPage from "./pages/BlogDetailPage";
+import AdminBlogsPage from "./pages/AdminBlogsPage";
+import CreateBlogPage from "./pages/CreateBlogPage";
+import EditBlogPage from "./pages/EditBlogPage";
 
 function App() {
   return (
     <>
       <div className="font-sans text-brand-text antialiased">
-        <Routes>
+        <ScrollToTop />
+        <AnimatedRoutes>
           {/* --- Public Routes with Main Layout --- */}
           <Route path="/" element={<Layout />}>
             <Route index element={<HomePage />} />
@@ -40,6 +48,8 @@ function App() {
             <Route path="properties/:identifier" element={<PropertyDetailPage />} />
             <Route path="pricing" element={<PricingPage />} />
             <Route path="/payment/success" element={<PaymentSuccessPage />} />
+            <Route path="blog" element={<BlogListPage />} />
+            <Route path="blog/:slug" element={<BlogDetailPage />} />
           </Route>
 
           {/* --- Auth Routes (No Layout) --- */}
@@ -63,14 +73,16 @@ function App() {
               <Route path="agents/edit/:id" element={<EditAgentPage />} />
               <Route path="users" element={<AdminUsersPage />} />
               <Route path="users/edit/:id" element={<EditUserPage />} />
-              {/* Future admin routes like "edit" will go here */}
+              <Route path="blogs" element={<AdminBlogsPage />} />
+              <Route path="blogs/new" element={<CreateBlogPage />} />
+              <Route path="blogs/edit/:id" element={<EditBlogPage />} />
             </Route>
           </Route>
 
           <Route element={<MemberRoute />}>
             <Route path="/dashboard" element={<UserDashboardPage />} />
           </Route>
-        </Routes>
+        </AnimatedRoutes>
         <ToastContainer
           position="bottom-right"
           autoClose={5000}

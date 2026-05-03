@@ -8,15 +8,17 @@ export default {
       // --- 1. FONT FAMILY ---
       fontFamily: {
         serif: ['"Cormorant Garamond"', ...defaultTheme.fontFamily.serif],
-        sans: ["Inter", ...defaultTheme.fontFamily.sans],
+        sans: ["Outfit", ...defaultTheme.fontFamily.sans],
       },
       // --- 2. COLOR PALETTE ---
       colors: {
-        "brand-dark": "#1e293b",
-        "brand-light": "#475569",
-        "brand-accent": "#4f46e5",
-        "brand-bg": "#f8fafc",
-        "brand-divider": "#cbd5e1",
+        "brand-dark": "#1a1a1a", // Deep, rich black instead of slate
+        "brand-light": "#6b7280", // Softer gray
+        "brand-accent": "#C5A059", // Muted Gold for luxury
+        "brand-accent-hover": "#D4AF37", // Brighter Gold
+        "brand-bg": "#FAFAFA", // Off-white luxury background
+        "brand-divider": "#e5e7eb",
+        "brand-champagne": "#F1E8D9",
       },
     },
   },

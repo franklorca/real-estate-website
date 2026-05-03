@@ -14,7 +14,7 @@ const Hero = () => {
       return (
         <Link
           to="/listings"
-          className="font-sans bg-brand-accent border-2 border-brand-accent text-white font-bold py-3 px-10 rounded-md text-lg uppercase tracking-wider transition-all duration-300 transform hover:scale-105 hover:bg-transparent hover:border-white"
+          className="font-sans bg-brand-accent text-white font-semibold py-3.5 px-10 rounded-sm text-[15px] uppercase tracking-[0.15em] transition-all duration-500 hover:bg-brand-accent-hover hover:shadow-[0_0_20px_rgba(197,160,89,0.4)]"
         >
           Explore Properties
         </Link>
@@ -26,7 +26,7 @@ const Hero = () => {
       return (
         <Link
           to="/pricing"
-          className="font-sans bg-yellow-500 border-2 border-yellow-500 text-white font-bold py-3 px-10 rounded-md text-lg uppercase tracking-wider transition-all duration-300 transform hover:scale-105 hover:bg-transparent hover:border-white"
+          className="font-sans bg-brand-accent text-white font-semibold py-3.5 px-10 rounded-sm text-[15px] uppercase tracking-[0.15em] transition-all duration-500 hover:bg-brand-accent-hover hover:shadow-[0_0_20px_rgba(197,160,89,0.4)]"
         >
           Complete Membership Setup
         </Link>
@@ -37,7 +37,7 @@ const Hero = () => {
     return (
       <Link
         to="/pricing"
-        className="font-sans bg-brand-accent text-white font-semibold py-3 px-8 rounded-md text-lg uppercase tracking-wider transition-transform transform hover:scale-105 shadow-lg"
+        className="font-sans bg-brand-accent text-white font-semibold py-3.5 px-10 rounded-sm text-[15px] uppercase tracking-[0.15em] transition-all duration-500 hover:bg-brand-accent-hover hover:shadow-[0_0_20px_rgba(197,160,89,0.4)]"
       >
         Become a Member
       </Link>
@@ -62,17 +62,17 @@ const Hero = () => {
 
       {/* --- Foreground Content --- */}
       <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1 }}
-        className="relative z-10 w-[90%] max-w-4xl bg-white/10 backdrop-blur-md rounded-xl shadow-2xl p-8 sm:p-12 text-white"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 1.5, ease: "easeOut" }}
+        className="relative z-10 w-[90%] max-w-5xl bg-black/20 backdrop-blur-sm border border-white/10 rounded-sm shadow-2xl p-10 sm:p-16 text-white"
       >
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="font-serif text-5xl sm:text-7xl lg:text-8xl font-bold tracking-tight"
-          style={{ textShadow: "0 2px 20px rgba(0,0,0,0.5)" }}
+          transition={{ duration: 1, delay: 0.3 }}
+          className="font-serif text-5xl sm:text-7xl lg:text-[6rem] font-medium tracking-wide"
+          style={{ textShadow: "0 4px 30px rgba(0,0,0,0.6)" }}
         >
           Luminous Heaven
         </motion.h1>
@@ -80,9 +80,9 @@ const Hero = () => {
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="font-sans mt-6 text-lg sm:text-xl max-w-2xl mx-auto opacity-90"
-          style={{ textShadow: "0 1px 10px rgba(0,0,0,0.5)" }}
+          transition={{ duration: 1, delay: 0.5 }}
+          className="font-sans mt-8 text-lg sm:text-xl max-w-2xl mx-auto opacity-90 font-light tracking-wide"
+          style={{ textShadow: "0 2px 15px rgba(0,0,0,0.6)" }}
         >
           Your Gateway to Extraordinary Living and Exclusive Rentals.
         </motion.p>
