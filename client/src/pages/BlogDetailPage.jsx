@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import axios from "axios";
+import api from "../services/api";
 import { Helmet } from "react-helmet-async";
 import { ArrowLeft, Calendar, User } from "lucide-react";
 
@@ -13,7 +13,7 @@ const BlogDetailPage = () => {
   useEffect(() => {
     const fetchBlog = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/blogs/${slug}`);
+        const response = await api.get(`/api/blogs/${slug}`);
         setBlog(response.data);
       } catch (error) {
         console.error("Failed to fetch blog:", error);

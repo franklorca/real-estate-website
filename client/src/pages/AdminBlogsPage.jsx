@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Plus, Edit, Trash2 } from "lucide-react";
-import axios from "axios";
+import api from "../services/api";
 import { toast } from "react-toastify";
 
 const AdminBlogsPage = () => {
@@ -10,7 +10,7 @@ const AdminBlogsPage = () => {
 
   const fetchBlogs = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/blogs");
+      const response = await api.get("/api/blogs");
       setBlogs(response.data);
     } catch (error) {
       toast.error("Failed to fetch blogs.");
@@ -26,10 +26,7 @@ const AdminBlogsPage = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this blog post?")) {
       try {
-        const token = localStorage.getItem("token");
-        await axios.delete(`http://localhost:5000/api/blogs/${id}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        await api.delete(`/api/blogs/${id}`);
         toast.success("Blog deleted successfully.");
         fetchBlogs();
       } catch (error) {
