@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import ImageUpload from "./ImageUpload";
 import { Editor } from "@tinymce/tinymce-react";
 import { toast } from "react-toastify";
+import { generateSlug } from "../utils/slugify";
 
 const BlogForm = ({ initialData = {}, onSubmit, buttonText }) => {
   const [formData, setFormData] = useState({
@@ -13,6 +14,8 @@ const BlogForm = ({ initialData = {}, onSubmit, buttonText }) => {
     author: "Luminous Heaven",
     published_at: new Date().toISOString().slice(0, 16),
   });
+
+  const [isSlugModified, setIsSlugModified] = useState(false);
 
   useEffect(() => {
     if (initialData.id) {
@@ -27,17 +30,25 @@ const BlogForm = ({ initialData = {}, onSubmit, buttonText }) => {
           ? new Date(initialData.published_at).toISOString().slice(0, 16)
           : new Date().toISOString().slice(0, 16),
       });
+      setIsSlugModified(true); // Don't auto-update slug for existing posts unless intentionally cleared
     }
   }, [initialData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    
+    if (name === "slug") {
+      setIsSlugModified(value !== "");
+    }
+
     setFormData((prev) => {
       const updated = { ...prev, [name]: value };
-      // Auto-generate slug from title if title is changed and slug is empty
-      if (name === "title" && !prev.slug) {
-        updated.slug = value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+      
+      // Auto-generate slug from title if title is changed and slug hasn't been manually edited
+      if (name === "title" && !isSlugModified) {
+        updated.slug = generateSlug(value);
       }
+      
       return updated;
     });
   };

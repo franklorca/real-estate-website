@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import api from "../services/api";
-import { Helmet } from "react-helmet-async";
+import SEO from "../components/SEO";
 import { ArrowRight, Calendar } from "lucide-react";
 
 const BlogListPage = () => {
@@ -33,10 +33,10 @@ const BlogListPage = () => {
 
   return (
     <div className="bg-brand-bg min-h-screen pt-24 pb-16 px-6 md:px-12 lg:px-24">
-      <Helmet>
-        <title>Journal | Luminous Heaven</title>
-        <meta name="description" content="Editorial insights, market trends, and luxury real estate news from Luminous Heaven." />
-      </Helmet>
+      <SEO 
+        title="Journal"
+        description="Editorial insights, market trends, and luxury real estate news from Luminous Heaven."
+      />
 
       <motion.div
         initial={{ opacity: 0, y: 30 }}

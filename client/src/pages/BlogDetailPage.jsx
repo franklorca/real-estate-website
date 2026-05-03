@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import api from "../services/api";
-import { Helmet } from "react-helmet-async";
+import SEO from "../components/SEO";
 import { ArrowLeft, Calendar, User } from "lucide-react";
 
 const BlogDetailPage = () => {
@@ -52,16 +52,12 @@ const BlogDetailPage = () => {
 
   return (
     <div className="bg-brand-bg min-h-screen pt-24 pb-24 px-6 md:px-12 lg:px-24">
-      <Helmet>
-        <title>{blog.title} | Luminous Heaven</title>
-        <meta name="description" content={blog.excerpt || `Read ${blog.title} on Luminous Heaven.`} />
-        
-        {/* Open Graph Tags for Social Sharing */}
-        <meta property="og:title" content={blog.title} />
-        <meta property="og:description" content={blog.excerpt || `Read ${blog.title} on Luminous Heaven.`} />
-        {blog.cover_image_url && <meta property="og:image" content={blog.cover_image_url} />}
-        <meta property="og:type" content="article" />
-      </Helmet>
+      <SEO 
+        title={blog.title}
+        description={blog.excerpt || `Read ${blog.title} on Luminous Heaven.`}
+        image={blog.cover_image_url}
+        type="article"
+      />
 
       <motion.article
         initial={{ opacity: 0, y: 30 }}
