@@ -54,7 +54,7 @@ export default async function handler(req, res) {
     if (propertyId) {
         try {
             // Note: We use the production API URL here. Make sure this runs correctly on vercel.
-            const apiUrl = process.env.VITE_API_URL || 'https://luminous-heaven-server.vercel.app';
+            const apiUrl = process.env.RENDER_BACKEND_URL || process.env.VITE_API_URL || 'https://luminous-heaven-server.vercel.app';
             const response = await axios.get(`${apiUrl}/api/properties/${propertyId}`);
             const property = response.data;
 

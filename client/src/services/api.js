@@ -3,7 +3,8 @@ import axios from 'axios';
 
 // Create a new instance of axios
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL, // The base URL is read from the .env file
+  // Use VITE_API_URL in development, and relative /api in production (to use Vercel proxy)
+  baseURL: import.meta.env.DEV ? import.meta.env.VITE_API_URL : '/api',
 });
 
 // Add a request interceptor

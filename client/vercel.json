@@ -1,6 +1,14 @@
 {
   "rewrites": [
     {
+      "source": "/api/seo-injector",
+      "destination": "/api/seo-injector"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "https://real-estate-website-wj16.onrender.com/api/:path*"
+    },
+    {
       "source": "/properties/(.*)",
       "destination": "/api/seo-injector"
     },
