@@ -3,10 +3,10 @@ import axios from 'axios';
 
 // Create a new instance of axios
 const api = axios.create({
-  // Fail-proof runtime check: if running on localhost, use local VITE_API_URL. In production, use /api proxy.
+  // Fail-proof runtime check: if running on localhost, use local VITE_API_URL. In production, use relative paths directly (empty string baseURL).
   baseURL: (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
     ? import.meta.env.VITE_API_URL
-    : '/api',
+    : '',
 });
 
 // Add a request interceptor
