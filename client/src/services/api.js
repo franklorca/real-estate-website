@@ -3,8 +3,10 @@ import axios from 'axios';
 
 // Create a new instance of axios
 const api = axios.create({
-  // Use VITE_API_URL in development, and relative /api in production (to use Vercel proxy)
-  baseURL: import.meta.env.DEV ? import.meta.env.VITE_API_URL : '/api',
+  // Fail-proof runtime check: if running on localhost, use local VITE_API_URL. In production, use /api proxy.
+  baseURL: (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
+    ? import.meta.env.VITE_API_URL
+    : '/api',
 });
 
 // Add a request interceptor
