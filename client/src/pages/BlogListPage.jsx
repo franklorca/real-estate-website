@@ -12,10 +12,6 @@ const BlogListPage = () => {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-    const safeBlogs = Array.isArray(blogs) ? blogs : [];
-
-    const fetchBlogs = async () => {
-      try {
         const response = await api.get("/api/blogs");
         if (Array.isArray(response.data)) {
           setBlogs(response.data);
