@@ -27,8 +27,8 @@ const SignUpPage = () => {
     try {
       const response = await api.post("/api/users/register", formData);
       loginAction(response.data.token);
-      toast.success("Account created successfully! Welcome to the club.");
-      setTimeout(() => navigate("/pricing"), 1500);
+      toast.success("Account created successfully! Welcome to Luminous Heaven.");
+      setTimeout(() => navigate("/dashboard"), 1500);
     } catch (err) {
       toast.error(
         err.response?.data?.message || "An error occurred during registration."

@@ -57,14 +57,14 @@ const Navbar = () => {
                 Login
               </Link>
               <Link
-                to="/pricing"
+                to="/signup"
                 className={`px-5 py-2 rounded-sm font-medium transition-colors duration-300 ${
                   isHomePage 
                     ? "bg-white text-brand-dark hover:bg-brand-champagne" 
                     : "bg-brand-accent text-white hover:bg-brand-accent-hover"
                 }`}
               >
-                Join Now
+                Sign Up
               </Link>
             </>
           )}
@@ -141,10 +141,10 @@ const Navbar = () => {
                 Login
               </Link>
               <Link
-                to="/pricing"
+                to="/signup"
                 className="block mt-2 py-2 text-center bg-indigo-600 rounded"
               >
-                Join Now
+                Sign Up
               </Link>
             </>
           )}

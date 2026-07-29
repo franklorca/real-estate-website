@@ -8,9 +8,12 @@ import PropertyCardSkeleton from "../components/PropertyCardSkeleton";
 import { motion, AnimatePresence } from "framer-motion";
 import SEO from "../components/SEO";
 
+import { fetchWithSWR } from "../utils/cache";
+
 const ListingsPage = () => {
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isSyncing, setIsSyncing] = useState(false);
   const [error, setError] = useState("");
 
   const location = useLocation();
@@ -21,23 +24,46 @@ const ListingsPage = () => {
   }, [location.search]);
 
   const fetchProperties = useCallback(async (filters) => {
+    setError("");
+    const queryParams = new URLSearchParams(filters).toString();
+    const cacheKey = `properties_list_${queryParams || "all"}`;
+
     try {
-      setLoading(true);
-      setError("");
-      const queryParams = new URLSearchParams(filters).toString();
-      await new Promise((res) => setTimeout(res, 500));
-      const response = await api.get(`/api/properties?${queryParams}`);
-      setProperties(response.data);
+      await fetchWithSWR(
+        cacheKey,
+        async () => {
+          const response = await api.get(`/api/properties?${queryParams}`);
+          return response.data;
+        },
+        {
+          onCacheHit: (cachedData) => {
+            setProperties(cachedData);
+            setLoading(false);
+          },
+          onSyncing: (syncState) => {
+            setIsSyncing(syncState);
+          },
+          onFreshData: (freshData) => {
+            setProperties(freshData);
+            setLoading(false);
+          },
+          onError: (err) => {
+            console.error("Could not fetch listings:", err);
+            if (properties.length === 0) {
+              setError("Could not fetch listings. Please try again later.");
+            }
+            setLoading(false);
+          },
+        }
+      );
     } catch (err) {
-      setError("Could not fetch listings. Please try again later.");
-    } finally {
       setLoading(false);
     }
-  }, []);
+  }, [properties.length]);
 
   useEffect(() => {
     fetchProperties(getFiltersFromQuery());
-  }, [fetchProperties, getFiltersFromQuery]);
+  }, [getFiltersFromQuery]);
 
   const handleFilterChange = (filters) => {
     const queryParams = new URLSearchParams(filters).toString();
@@ -79,8 +105,13 @@ const ListingsPage = () => {
         >
           {title}
         </motion.h1>
-        <p className="mt-6 max-w-2xl mx-auto text-lg text-brand-light font-sans tracking-wide">
-          {subtitle}
+        <p className="mt-6 max-w-2xl mx-auto text-lg text-brand-light font-sans tracking-wide flex items-center justify-center gap-2">
+          <span>{subtitle}</span>
+          {isSyncing && (
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 animate-pulse">
+              Syncing fresh data...
+            </span>
+          )}
         </p>
       </div>
     );

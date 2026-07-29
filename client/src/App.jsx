@@ -27,15 +27,16 @@ import CreateAgentPage from "./pages/CreateAgentPage";
 import EditAgentPage from "./pages/EditAgentPage";
 import AdminUsersPage from "./pages/AdminUsersPage";
 import EditUserPage from "./pages/EditUserPage";
-import PricingPage from "./pages/PricingPage";
-import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 import BlogListPage from "./pages/BlogListPage";
 import BlogDetailPage from "./pages/BlogDetailPage";
 import AdminBlogsPage from "./pages/AdminBlogsPage";
 import CreateBlogPage from "./pages/CreateBlogPage";
 import EditBlogPage from "./pages/EditBlogPage";
+import { useHeartbeat } from "./hooks/useHeartbeat";
 
 function App() {
+  useHeartbeat();
+
   return (
     <>
       <div className="font-sans text-brand-text antialiased">
@@ -46,8 +47,6 @@ function App() {
             <Route index element={<HomePage />} />
             <Route path="listings" element={<ListingsPage />} />
             <Route path="properties/:identifier" element={<PropertyDetailPage />} />
-            <Route path="pricing" element={<PricingPage />} />
-            <Route path="/payment/success" element={<PaymentSuccessPage />} />
             <Route path="blog" element={<BlogListPage />} />
             <Route path="blog/:slug" element={<BlogDetailPage />} />
           </Route>

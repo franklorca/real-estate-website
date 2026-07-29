@@ -6,6 +6,8 @@ import PropertyCard from "./PropertyCard";
 import { generateSmartSlug } from "../utils/slugify";
 import { motion } from "framer-motion";
 
+import { fetchWithSWR } from "../utils/cache";
+
 const FeaturedListings = () => {
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -14,16 +16,36 @@ const FeaturedListings = () => {
   useEffect(() => {
     const fetchFeaturedProperties = async () => {
       try {
-        const response = await api.get("/api/properties");
-        setProperties(response.data.slice(0, 3));
+        await fetchWithSWR(
+          "featured_properties",
+          async () => {
+            const response = await api.get("/api/properties");
+            return response.data.slice(0, 3);
+          },
+          {
+            onCacheHit: (cached) => {
+              setProperties(cached);
+              setLoading(false);
+            },
+            onFreshData: (fresh) => {
+              setProperties(fresh);
+              setLoading(false);
+            },
+            onError: (err) => {
+              console.error("Featured listings error:", err);
+              if (properties.length === 0) {
+                setError("Unable to load featured listings.");
+              }
+              setLoading(false);
+            },
+          }
+        );
       } catch (err) {
-        setError("Unable to load featured listings.");
-      } finally {
         setLoading(false);
       }
     };
     fetchFeaturedProperties();
-  }, []);
+  }, [properties.length]);
 
   const renderContent = () => {
     if (loading) return <p className="text-center text-brand-light">Loading...</p>;

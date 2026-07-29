@@ -5,8 +5,7 @@ import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import AgentProfile from "../components/AgentProfile";
 import { generateSmartSlug, decodeId, isValidHashId } from "../utils/slugify";
-import SEO from "../components/SEO";
-import { motion, AnimatePresence } from "framer-motion";
+import { fetchWithSWR } from "../utils/cache";
 
 // --- Helper Components ---
 
@@ -105,44 +104,52 @@ const PropertyDetailPage = () => {
   }
 
   const navigate = useNavigate();
-  const { user } = useAuth();
-
-  const hasActiveMembership = user && user.membership_status === "active";
 
   useEffect(() => {
     const fetchProperty = async () => {
+      if (!resolvedId) {
+        setLoading(false);
+        setError("Invalid property link.");
+        return;
+      }
+
       try {
-        setLoading(true);
-        const response = await api.get(`/api/properties/${resolvedId}`);
-        const fetchedProperty = response.data;
-        setProperty(fetchedProperty);
+        await fetchWithSWR(
+          `property_${resolvedId}`,
+          async () => {
+            const response = await api.get(`/api/properties/${resolvedId}`);
+            return response.data;
+          },
+          {
+            onCacheHit: (cachedProperty) => {
+              setProperty(cachedProperty);
+              setLoading(false);
+            },
+            onFreshData: (fetchedProperty) => {
+              setProperty(fetchedProperty);
+              setLoading(false);
 
-        // --- Redirect to canonical Smart Slug if needed ---
-        const expectedIdentifier = generateSmartSlug(fetchedProperty.id, fetchedProperty.title);
-        if (identifier !== expectedIdentifier) {
-          navigate(`/properties/${expectedIdentifier}`, { replace: true });
-        }
-
-        const gallery = fetchedProperty.image_gallery || [];
-        if (gallery.length > 0) {
-          setCurrentIndex(0);
-        } else {
-          setCurrentIndex(0);
-        }
+              // --- Redirect to canonical Smart Slug if needed ---
+              const expectedIdentifier = generateSmartSlug(fetchedProperty.id, fetchedProperty.title);
+              if (identifier !== expectedIdentifier) {
+                navigate(`/properties/${expectedIdentifier}`, { replace: true });
+              }
+            },
+            onError: (err) => {
+              console.error("Failed to fetch property details:", err);
+              if (!property) {
+                setError("Could not load property details. It may have been removed.");
+              }
+              setLoading(false);
+            },
+          }
+        );
       } catch (err) {
-        console.error("Failed to fetch property details:", err);
-        setError("Could not load property details. It may have been removed.");
-      } finally {
         setLoading(false);
       }
     };
 
-    if (resolvedId) {
-      fetchProperty();
-    } else {
-      setLoading(false);
-      setError("Invalid property link.");
-    }
+    fetchProperty();
   }, [resolvedId, identifier, navigate]);
 
   const handleNext = () => {
@@ -369,51 +376,29 @@ const PropertyDetailPage = () => {
               </div>
             </section>
 
-            {hasActiveMembership ? (
-              <>
-                {property.video_url && (
-                  <section className="mt-12 pt-8 border-t border-brand-divider">
-                    <h2 className="font-serif text-3xl font-semibold text-brand-dark">
-                      Video Tour
-                    </h2>
-                    <div className="mt-4">
-                      <VideoPlayer videoUrl={property.video_url} />
-                    </div>
-                  </section>
-                )}
-                {property.floor_plan_url && (
-                  <section className="mt-12 pt-8 border-t border-brand-divider">
-                    <h2 className="font-serif text-3xl font-semibold text-brand-dark">
-                      Floor Plan
-                    </h2>
-                    <div className="mt-4 border rounded-lg overflow-hidden">
-                      <img
-                        src={property.floor_plan_url}
-                        alt="Floor Plan"
-                        className="w-full h-auto"
-                      />
-                    </div>
-                  </section>
-                )}
-              </>
-            ) : (
-              (property.video_url || property.floor_plan_url) && (
-                <div className="mt-12 pt-8 border-t border-brand-divider text-center bg-brand-bg-light p-8 rounded-lg">
-                  <h3 className="font-serif text-2xl font-semibold text-brand-dark">
-                    Unlock Full Media Access
-                  </h3>
-                  <p className="mt-2 text-brand-light">
-                    Video tours and floor plans are available exclusively for
-                    our members.
-                  </p>
-                  <Link
-                    to="/pricing"
-                    className="mt-6 inline-block w-full sm:w-auto bg-brand-accent text-white py-3 px-6 rounded-md font-semibold hover:bg-brand-dark transition-colors"
-                  >
-                    Become a Member
-                  </Link>
+            {property.video_url && (
+              <section className="mt-12 pt-8 border-t border-brand-divider">
+                <h2 className="font-serif text-3xl font-semibold text-brand-dark">
+                  Video Tour
+                </h2>
+                <div className="mt-4">
+                  <VideoPlayer videoUrl={property.video_url} />
                 </div>
-              )
+              </section>
+            )}
+            {property.floor_plan_url && (
+              <section className="mt-12 pt-8 border-t border-brand-divider">
+                <h2 className="font-serif text-3xl font-semibold text-brand-dark">
+                  Floor Plan
+                </h2>
+                <div className="mt-4 border rounded-lg overflow-hidden">
+                  <img
+                    src={property.floor_plan_url}
+                    alt="Floor Plan"
+                    className="w-full h-auto"
+                  />
+                </div>
+              </section>
             )}
           </div>
 
@@ -431,29 +416,12 @@ const PropertyDetailPage = () => {
                 </p>
               </div>
 
-              {hasActiveMembership ? (
-                <div className="bg-brand-bg-light p-6 rounded-lg shadow-sm border border-gray-200/80">
-                  <AgentProfile
-                    agentId={property.agent_id}
-                    propertyId={property.id}
-                  />
-                </div>
-              ) : (
-                <div className="bg-brand-bg-light p-6 rounded-lg shadow-sm border border-gray-200/80 text-center">
-                  <h3 className="font-serif text-xl font-semibold text-brand-dark">
-                    Unlock Full Listing Details
-                  </h3>
-                  <p className="mt-2 text-brand-light">
-                    Agent contact information is reserved for members.
-                  </p>
-                  <Link
-                    to={user ? "/pricing" : "/login?redirect=/pricing"}
-                    className="mt-6 inline-block w-full bg-brand-accent text-white py-3 rounded-lg font-semibold hover:bg-brand-dark transition-colors"
-                  >
-                    {user ? "Upgrade Your Membership" : "Login to Continue"}
-                  </Link>
-                </div>
-              )}
+              <div className="bg-brand-bg-light p-6 rounded-lg shadow-sm border border-gray-200/80">
+                <AgentProfile
+                  agentId={property.agent_id}
+                  propertyId={property.id}
+                />
+              </div>
             </div>
           </div>
         </div>

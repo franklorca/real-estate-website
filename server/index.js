@@ -8,7 +8,6 @@ const propertyRoutes = require("./propertyRoutes");
 const agentRoutes = require("./agentRoutes");
 const inquiryRoutes = require("./inquiryRoutes");
 const adminRoutes = require("./adminRoutes");
-const paymentRoutes = require("./paymentRoutes");
 const cloudinaryRoutes = require("./cloudinaryRoutes");
 const blogRoutes = require("./blogRoutes");
 
@@ -29,7 +28,6 @@ app.use("/api/properties", propertyRoutes);
 app.use("/api/agents", agentRoutes);
 app.use("/api/inquiries", inquiryRoutes);
 app.use("/api/admin", adminRoutes);
-app.use("/api/payments", paymentRoutes);
 app.use("/api/cloudinary", cloudinaryRoutes);
 app.use("/api/blogs", blogRoutes);
 

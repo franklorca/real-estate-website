@@ -27,7 +27,7 @@ router.post("/register", async (req, res) => {
     const password_hash = bcrypt.hashSync(password, 10);
 
     const [newUser] = await db("users")
-      .insert({ name, email, password_hash, role: "member" })
+      .insert({ name, email, password_hash, role: "member", membership_status: "active" })
       .returning(["id", "name", "email"]); // Ask for specific fields back
 
     const payload = {
@@ -35,7 +35,7 @@ router.post("/register", async (req, res) => {
       email: newUser.email,
       role: "member",
       name: newUser.name,
-      membership_status: "pending",
+      membership_status: "active",
     };
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: "1d",

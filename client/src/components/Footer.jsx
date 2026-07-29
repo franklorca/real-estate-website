@@ -26,7 +26,7 @@ const Footer = () => {
           <div className="col-span-2 md:col-span-1">
             <h4 className="font-serif italic text-xl text-brand-champagne mb-6">The Club</h4>
             <ul className="space-y-4 flex flex-col">
-              <FooterLink to="/pricing">Membership</FooterLink>
+              <FooterLink to="/listings">Collection</FooterLink>
               <FooterLink to="/login">Member Portal</FooterLink>
             </ul>
           </div>

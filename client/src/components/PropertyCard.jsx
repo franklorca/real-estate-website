@@ -60,7 +60,7 @@ const PropertyCard = ({ property, onUnsave, isLarge = false }) => {
           />
         </Link>
 
-        {user && user.membership_status === "active" && (
+        {user && (
           <button
             onClick={handleSaveToggle}
             className="absolute top-4 right-4 z-10 transition-transform transform hover:scale-110"

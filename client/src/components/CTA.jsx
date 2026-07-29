@@ -32,10 +32,10 @@ const CTA = () => {
           </p>
           <div className="mt-12">
             <Link
-              to="/pricing"
+              to="/signup"
               className="font-sans bg-brand-accent text-white font-semibold py-4 px-10 rounded-md text-lg uppercase tracking-wider transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
             >
-              Become a Member
+              Sign Up Free
             </Link>
           </div>
         </motion.div>

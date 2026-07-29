@@ -9,37 +9,12 @@ const Hero = () => {
   const { user } = useAuth();
 
   const renderCtaButton = () => {
-    // --- CASE 1: Logged in and active member ---
-    if (user && user.membership_status === "active") {
-      return (
-        <Link
-          to="/listings"
-          className="font-sans bg-brand-accent text-white font-semibold py-3.5 px-10 rounded-sm text-[15px] uppercase tracking-[0.15em] transition-all duration-500 hover:bg-brand-accent-hover hover:shadow-[0_0_20px_rgba(197,160,89,0.4)]"
-        >
-          Explore Properties
-        </Link>
-      );
-    }
-
-    // --- CASE 2: Logged in but pending membership ---
-    if (user && user.membership_status === "pending") {
-      return (
-        <Link
-          to="/pricing"
-          className="font-sans bg-brand-accent text-white font-semibold py-3.5 px-10 rounded-sm text-[15px] uppercase tracking-[0.15em] transition-all duration-500 hover:bg-brand-accent-hover hover:shadow-[0_0_20px_rgba(197,160,89,0.4)]"
-        >
-          Complete Membership Setup
-        </Link>
-      );
-    }
-
-    // --- CASE 3: Guest (not logged in) ---
     return (
       <Link
-        to="/pricing"
+        to="/listings"
         className="font-sans bg-brand-accent text-white font-semibold py-3.5 px-10 rounded-sm text-[15px] uppercase tracking-[0.15em] transition-all duration-500 hover:bg-brand-accent-hover hover:shadow-[0_0_20px_rgba(197,160,89,0.4)]"
       >
-        Become a Member
+        Explore Collection
       </Link>
     );
   };
