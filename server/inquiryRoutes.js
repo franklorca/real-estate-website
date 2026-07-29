@@ -2,7 +2,7 @@
 const express = require("express");
 const { Resend } = require("resend");
 const db = require("./db"); // <-- THIS WAS THE MISSING LINE
-const { requireAuth } = require("./authMiddleware");
+const jwt = require("jsonwebtoken");
 
 const router = express.Router();
 
@@ -20,7 +20,7 @@ if (process.env.RESEND_API_KEY) {
   );
 }
 
-router.post("/", requireAuth, async (req, res) => {
+router.post("/", async (req, res) => {
   // Check if Resend was initialized correctly
   if (!resend) {
     return res
@@ -28,8 +28,7 @@ router.post("/", requireAuth, async (req, res) => {
       .json({ message: "Email service is not configured." });
   }
 
-  const { propertyId, message } = req.body;
-  const member = req.user;
+  const { propertyId, message, guestName, guestEmail } = req.body;
 
   if (!propertyId || !message) {
     return res
@@ -37,8 +36,32 @@ router.post("/", requireAuth, async (req, res) => {
       .json({ message: "Property ID and message are required." });
   }
 
+  // Extract optional user info from Authorization header if present
+  let senderName = guestName;
+  let senderEmail = guestEmail;
+
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    const token = authHeader.split(" ")[1];
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      if (decoded) {
+        const memberProfile = await db("users").where({ id: decoded.userId }).first();
+        if (memberProfile) {
+          senderName = memberProfile.name;
+          senderEmail = memberProfile.email;
+        }
+      }
+    } catch (e) {
+      // Continue with guest details if token invalid
+    }
+  }
+
+  if (!senderName || !senderEmail) {
+    return res.status(400).json({ message: "Sender name and email are required." });
+  }
+
   try {
-    // This query logic is complex, let's simplify and make it more robust.
     const property = await db("properties").where({ id: propertyId }).first();
     if (!property) {
       return res.status(404).json({ message: "Property not found." });
@@ -49,13 +72,6 @@ router.post("/", requireAuth, async (req, res) => {
       return res
         .status(404)
         .json({ message: "Agent for this property not found." });
-    }
-
-    const memberProfile = await db("users")
-      .where({ id: member.userId })
-      .first();
-    if (!memberProfile) {
-      return res.status(404).json({ message: "Member profile not found." });
     }
 
     const { data, error } = await resend.emails.send({
@@ -73,9 +89,9 @@ router.post("/", requireAuth, async (req, res) => {
         property.price
       )}</p>
         <hr>
-        <h2>Member Details</h2>
-        <p><strong>Name:</strong> ${memberProfile.name}</p>
-        <p><strong>Email:</strong> ${memberProfile.email}</p>
+        <h2>Sender Details</h2>
+        <p><strong>Name:</strong> ${senderName}</p>
+        <p><strong>Email:</strong> ${senderEmail}</p>
         <hr>
         <h2>Message</h2>
         <p>${message}</p>

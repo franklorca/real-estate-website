@@ -32,7 +32,7 @@ import BlogDetailPage from "./pages/BlogDetailPage";
 import AdminBlogsPage from "./pages/AdminBlogsPage";
 import CreateBlogPage from "./pages/CreateBlogPage";
 import EditBlogPage from "./pages/EditBlogPage";
-import { useHeartbeat } from "./hooks/useHeartbeat";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 function App() {
   useHeartbeat();
@@ -41,7 +41,8 @@ function App() {
     <>
       <div className="font-sans text-brand-text antialiased">
         <ScrollToTop />
-        <AnimatedRoutes>
+        <ErrorBoundary>
+          <AnimatedRoutes>
           {/* --- Public Routes with Main Layout --- */}
           <Route path="/" element={<Layout />}>
             <Route index element={<HomePage />} />
@@ -82,6 +83,7 @@ function App() {
             <Route path="/dashboard" element={<UserDashboardPage />} />
           </Route>
         </AnimatedRoutes>
+        </ErrorBoundary>
         <ToastContainer
           position="bottom-right"
           autoClose={5000}

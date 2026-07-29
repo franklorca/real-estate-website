@@ -1,16 +1,14 @@
-// client/src/components/AgentProfile.jsx
-import React, { useState, useEffect } from "react";
-import api from "../services/api";
-import { toast } from "react-toastify";
+import { useAuth } from "../context/AuthContext";
 
-// The 'onInquirySubmit' prop is no longer needed with this implementation
 const AgentProfile = ({ agentId, propertyId }) => {
+  const { user } = useAuth();
   const [agent, setAgent] = useState(null);
+  const [guestName, setGuestName] = useState("");
+  const [guestEmail, setGuestEmail] = useState("");
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    // Don't fetch if no agent is assigned to the property
     if (!agentId) return;
 
     const fetchAgent = async () => {
@@ -19,37 +17,42 @@ const AgentProfile = ({ agentId, propertyId }) => {
         setAgent(response.data);
       } catch (error) {
         console.error("Failed to fetch agent profile:", error);
-        // Silently fail if agent can't be loaded, the component will just show a loading state.
       }
     };
     fetchAgent();
   }, [agentId]);
 
-  // Make the function async to handle the API call
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!message.trim()) {
       toast.warn("Please enter a message for the agent.");
       return;
     }
+    if (!user && (!guestName.trim() || !guestEmail.trim())) {
+      toast.warn("Please enter your name and email.");
+      return;
+    }
     setIsSubmitting(true);
 
     try {
-      // Make the API call to our new backend endpoint
       await api.post("/api/inquiries", {
         propertyId: propertyId,
         message: message,
+        guestName: user ? undefined : guestName,
+        guestEmail: user ? undefined : guestEmail,
       });
 
       toast.success("Your inquiry has been sent to the agent!");
-      setMessage(""); // Clear the form on success
+      setMessage("");
+      setGuestName("");
+      setGuestEmail("");
     } catch (error) {
       console.error("Failed to send inquiry:", error);
       toast.error(
         "There was a problem sending your message. Please try again later."
       );
     } finally {
-      setIsSubmitting(false); // Re-enable the button whether it succeeded or failed
+      setIsSubmitting(false);
     }
   };
 
@@ -89,12 +92,32 @@ const AgentProfile = ({ agentId, propertyId }) => {
           Contact This Agent Directly
         </h4>
         <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+          {!user && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <input
+                type="text"
+                placeholder="Your Name"
+                value={guestName}
+                onChange={(e) => setGuestName(e.target.value)}
+                className="w-full p-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 text-sm"
+                required
+              />
+              <input
+                type="email"
+                placeholder="Your Email"
+                value={guestEmail}
+                onChange={(e) => setGuestEmail(e.target.value)}
+                className="w-full p-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 text-sm"
+                required
+              />
+            </div>
+          )}
           <textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             rows="4"
             placeholder="Hello, I'm interested in this property and would like to schedule a viewing..."
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500"
+            className="w-full p-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 text-sm"
             required
           ></textarea>
           <button

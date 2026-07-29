@@ -122,24 +122,28 @@ const PropertyDetailPage = () => {
           },
           {
             onCacheHit: (cachedProperty) => {
-              setProperty(cachedProperty);
-              setLoading(false);
+              if (cachedProperty) {
+                setProperty(cachedProperty);
+                setLoading(false);
+              }
             },
             onFreshData: (fetchedProperty) => {
-              setProperty(fetchedProperty);
-              setLoading(false);
+              if (fetchedProperty) {
+                setProperty(fetchedProperty);
+                setLoading(false);
 
-              // --- Redirect to canonical Smart Slug if needed ---
-              const expectedIdentifier = generateSmartSlug(fetchedProperty.id, fetchedProperty.title);
-              if (identifier !== expectedIdentifier) {
-                navigate(`/properties/${expectedIdentifier}`, { replace: true });
+                // --- Redirect to canonical Smart Slug if needed ---
+                if (fetchedProperty.id && fetchedProperty.title) {
+                  const expectedIdentifier = generateSmartSlug(fetchedProperty.id, fetchedProperty.title);
+                  if (identifier !== expectedIdentifier && !isStrictlyNumeric) {
+                    navigate(`/properties/${expectedIdentifier}`, { replace: true });
+                  }
+                }
               }
             },
             onError: (err) => {
               console.error("Failed to fetch property details:", err);
-              if (!property) {
-                setError("Could not load property details. It may have been removed.");
-              }
+              setError("Could not load property details. It may have been removed.");
               setLoading(false);
             },
           }
@@ -150,7 +154,23 @@ const PropertyDetailPage = () => {
     };
 
     fetchProperty();
-  }, [resolvedId, identifier, navigate]);
+  }, [resolvedId, isStrictlyNumeric, navigate]);
+
+  const rawGallery = property?.image_gallery;
+  let galleryImages = [];
+  if (Array.isArray(rawGallery)) {
+    galleryImages = rawGallery;
+  } else if (typeof rawGallery === "string") {
+    try {
+      const parsed = JSON.parse(rawGallery);
+      if (Array.isArray(parsed)) galleryImages = parsed;
+    } catch (e) {
+      galleryImages = [];
+    }
+  }
+  if (!Array.isArray(galleryImages) || galleryImages.length === 0) {
+    galleryImages = property?.image ? [property.image] : [];
+  }
 
   const handleNext = () => {
     if (!galleryImages.length) return;
@@ -184,13 +204,11 @@ const PropertyDetailPage = () => {
   };
 
   if (loading)
-    return <div className="text-center py-40">Loading Property...</div>;
+    return <div className="text-center py-40 font-sans text-brand-light">Loading Property...</div>;
   if (error)
-    return <div className="text-center py-40 text-red-500">{error}</div>;
+    return <div className="text-center py-40 text-red-500 font-sans">{error}</div>;
   if (!property)
-    return <div className="text-center py-40">Property not found.</div>;
-
-  const galleryImages = property.image_gallery || [];
+    return <div className="text-center py-40 font-sans">Property not found.</div>;
 
   return (
     <div className="bg-brand-bg-white">
