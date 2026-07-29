@@ -33,33 +33,36 @@ const ListingsPage = () => {
         cacheKey,
         async () => {
           const response = await api.get(`/api/properties?${queryParams}`);
-          return response.data;
+          return Array.isArray(response.data) ? response.data : [];
         },
         {
           onCacheHit: (cachedData) => {
-            setProperties(cachedData);
-            setLoading(false);
+            if (Array.isArray(cachedData)) {
+              setProperties(cachedData);
+              setLoading(false);
+            }
           },
           onSyncing: (syncState) => {
             setIsSyncing(syncState);
           },
           onFreshData: (freshData) => {
-            setProperties(freshData);
-            setLoading(false);
+            if (Array.isArray(freshData)) {
+              setProperties(freshData);
+              setLoading(false);
+            }
           },
           onError: (err) => {
             console.error("Could not fetch listings:", err);
-            if (properties.length === 0) {
-              setError("Could not fetch listings. Please try again later.");
-            }
+            setError("Could not fetch listings. Please try again later.");
             setLoading(false);
           },
-        }
+        },
+        Array.isArray
       );
     } catch (err) {
       setLoading(false);
     }
-  }, [properties.length]);
+  }, []);
 
   useEffect(() => {
     fetchProperties(getFiltersFromQuery());
@@ -153,7 +156,7 @@ const ListingsPage = () => {
           >
             {loading ? (
               renderSkeleton()
-            ) : properties.length > 0 ? (
+            ) : Array.isArray(properties) && properties.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-16 gap-x-8 lg:gap-x-12">
                 {properties.map((property, index) => {
                   // Make every 4th item span 2 columns on desktop to create a dynamic Bento grid

@@ -12,16 +12,27 @@ const BlogListPage = () => {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
+    const safeBlogs = Array.isArray(blogs) ? blogs : [];
+
+    const fetchBlogs = async () => {
+      try {
         const response = await api.get("/api/blogs");
-        setBlogs(response.data);
+        if (Array.isArray(response.data)) {
+          setBlogs(response.data);
+        } else {
+          setBlogs([]);
+        }
       } catch (error) {
         console.error("Failed to fetch blogs:", error);
+        setBlogs([]);
       } finally {
         setLoading(false);
       }
     };
     fetchBlogs();
   }, []);
+
+  const safeBlogs = Array.isArray(blogs) ? blogs : [];
 
   if (loading) {
     return (
@@ -54,7 +65,7 @@ const BlogListPage = () => {
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-          {blogs.map((blog, index) => (
+          {safeBlogs.map((blog, index) => (
             <motion.article
               key={blog.id}
               initial={{ opacity: 0, y: 20 }}
@@ -104,7 +115,7 @@ const BlogListPage = () => {
           ))}
         </div>
         
-        {blogs.length === 0 && (
+        {safeBlogs.length === 0 && (
           <div className="text-center py-24 text-brand-light font-serif text-xl">
             No articles published yet. Check back soon.
           </div>

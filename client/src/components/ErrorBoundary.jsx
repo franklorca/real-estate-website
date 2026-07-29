@@ -14,6 +14,14 @@ class ErrorBoundary extends React.Component {
 
   componentDidCatch(error, errorInfo) {
     console.error("Uncaught React rendering error:", error, errorInfo);
+    try {
+      Object.keys(localStorage).forEach((key) => {
+        if (key.startsWith("lh_cache_")) {
+          localStorage.removeItem(key);
+        }
+      });
+      console.log("[ErrorBoundary] Auto-purged SWR local cache entries to restore clean state.");
+    } catch (e) {}
   }
 
   render() {

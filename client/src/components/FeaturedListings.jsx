@@ -20,39 +20,44 @@ const FeaturedListings = () => {
           "featured_properties",
           async () => {
             const response = await api.get("/api/properties");
-            return response.data.slice(0, 3);
+            return Array.isArray(response.data) ? response.data.slice(0, 3) : [];
           },
           {
             onCacheHit: (cached) => {
-              setProperties(cached);
-              setLoading(false);
+              if (Array.isArray(cached)) {
+                setProperties(cached);
+                setLoading(false);
+              }
             },
             onFreshData: (fresh) => {
-              setProperties(fresh);
-              setLoading(false);
+              if (Array.isArray(fresh)) {
+                setProperties(fresh);
+                setLoading(false);
+              }
             },
             onError: (err) => {
               console.error("Featured listings error:", err);
-              if (properties.length === 0) {
-                setError("Unable to load featured listings.");
-              }
+              setError("Unable to load featured listings.");
               setLoading(false);
             },
-          }
+          },
+          Array.isArray
         );
       } catch (err) {
         setLoading(false);
       }
     };
     fetchFeaturedProperties();
-  }, [properties.length]);
+  }, []);
 
   const renderContent = () => {
+    const safeProperties = Array.isArray(properties) ? properties : [];
+
     if (loading) return <p className="text-center text-brand-light">Loading...</p>;
     if (error) return <p className="text-center text-red-500">{error}</p>;
-    if (properties.length === 0) return null;
+    if (safeProperties.length === 0) return null;
 
-    const [heroProperty, ...secondaryProperties] = properties;
+    const [heroProperty, ...secondaryProperties] = safeProperties;
 
     return (
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16">

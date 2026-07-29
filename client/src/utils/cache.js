@@ -4,25 +4,74 @@ import { APP_CONFIG } from "../config/appConfig";
 const CACHE_PREFIX = "lh_cache_";
 
 /**
- * Gets cached data from localStorage if present and valid.
- * Returns null if not found.
+ * Purges all Luminous Heaven SWR cache keys from localStorage.
  */
-export const getCachedData = (key) => {
+export const clearAllSWRCache = () => {
+  try {
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith(CACHE_PREFIX)) {
+        localStorage.removeItem(key);
+      }
+    });
+    console.log("[SWR Cache] Cleared all local SWR cache entries.");
+  } catch (err) {
+    console.warn("[SWR Cache] Error clearing SWR cache:", err);
+  }
+};
+
+/**
+ * Gets cached data from localStorage if present and valid.
+ * Optional validator callback allows strict type checking (e.g. Array.isArray).
+ */
+export const getCachedData = (key, validator = null) => {
   try {
     const raw = localStorage.getItem(CACHE_PREFIX + key);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
-    return parsed.data || null;
+    const data = parsed?.data ?? null;
+
+    if (data === null) {
+      localStorage.removeItem(CACHE_PREFIX + key);
+      return null;
+    }
+
+    // Check optional validator (e.g. Array.isArray)
+    if (validator && typeof validator === "function") {
+      if (!validator(data)) {
+        console.warn(`[SWR Cache] Cached data failed validation for key "${key}". Purging key.`);
+        localStorage.removeItem(CACHE_PREFIX + key);
+        return null;
+      }
+    }
+
+    return data;
   } catch (err) {
-    console.warn(`[SWR Cache] Error reading cache key "${key}":`, err);
+    console.warn(`[SWR Cache] Error reading/parsing cache key "${key}":`, err);
+    try {
+      localStorage.removeItem(CACHE_PREFIX + key);
+    } catch (e) {}
     return null;
   }
 };
 
 /**
  * Saves data to localStorage with timestamp.
+ * Rejects caching if data is null/undefined or an error object.
  */
-export const setCachedData = (key, data) => {
+export const setCachedData = (key, data, validator = null) => {
+  if (data === null || data === undefined) return;
+
+  // Don't cache error objects or error messages
+  if (typeof data === "object" && data !== null && !Array.isArray(data) && (data.error || data.message)) {
+    console.warn(`[SWR Cache] Refusing to cache error response object for key "${key}".`);
+    return;
+  }
+
+  if (validator && typeof validator === "function" && !validator(data)) {
+    console.warn(`[SWR Cache] Refusing to cache invalid data for key "${key}".`);
+    return;
+  }
+
   try {
     const payload = {
       timestamp: Date.now(),
@@ -35,16 +84,12 @@ export const setCachedData = (key, data) => {
 };
 
 /**
- * Stale-While-Revalidate execution helper:
- * 1. Checks cache and immediately fires onCacheHit(cachedData) if present (0ms delay).
- * 2. Signals onSyncing(true) to show a subtle background update indicator if desired.
- * 3. Fires fetcher() to fetch fresh data from backend.
- * 4. Updates cache and fires onFreshData(freshData).
+ * Stale-While-Revalidate execution helper with strict type validation.
  */
-export const fetchWithSWR = async (key, fetcher, callbacks = {}) => {
+export const fetchWithSWR = async (key, fetcher, callbacks = {}, validator = null) => {
   const { onCacheHit, onFreshData, onSyncing, onError } = callbacks;
 
-  const cachedData = getCachedData(key);
+  const cachedData = getCachedData(key, validator);
   let hasCache = false;
 
   if (cachedData !== null) {
@@ -60,7 +105,17 @@ export const fetchWithSWR = async (key, fetcher, callbacks = {}) => {
 
   try {
     const freshData = await fetcher();
-    setCachedData(key, freshData);
+
+    // Validate fresh data before updating cache and notifying component
+    if (validator && typeof validator === "function" && !validator(freshData)) {
+      console.warn(`[SWR Cache] Fresh data failed validation for key "${key}". Ignoring payload.`);
+      if (onSyncing) onSyncing(false);
+      if (hasCache) return cachedData;
+      throw new Error(`Invalid data format received for "${key}".`);
+    }
+
+    setCachedData(key, freshData, validator);
+
     if (onFreshData) {
       onFreshData(freshData);
     }
@@ -69,14 +124,13 @@ export const fetchWithSWR = async (key, fetcher, callbacks = {}) => {
     }
     return freshData;
   } catch (err) {
-    console.warn(`[SWR Cache] Background revalidation failed for "${key}":`, err);
+    console.warn(`[SWR Cache] Background revalidation failed for "${key}":`, err?.message || err);
     if (onSyncing) {
       onSyncing(false);
     }
     if (onError) {
       onError(err);
     }
-    // If we had cached data, don't crash the page—visitor already sees cached data!
     if (hasCache) {
       return cachedData;
     }
