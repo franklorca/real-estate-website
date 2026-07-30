@@ -1,0 +1,33 @@
+{
+  "name": "luminousheaven",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@tailwindcss/aspect-ratio": "^0.4.2",
+    "@tailwindcss/typography": "^0.5.20",
+    "@tinymce/tinymce-react": "^6.3.0",
+    "bcryptjs": "^3.0.3",
+    "better-auth": "^1.6.25",
+    "cloudinary": "^2.10.0",
+    "framer-motion": "^12.43.0",
+    "hashids": "^2.3.0",
+    "jwt-decode": "^4.0.0",
+    "knex": "^3.3.0",
+    "lucide-react": "^1.27.0",
+    "next": "16.2.12",
+    "pg": "^8.22.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "react-toastify": "^11.1.0",
+    "resend": "^6.18.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "tailwindcss": "^4"
+  }
+}

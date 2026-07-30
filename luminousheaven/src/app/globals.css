@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    background-color: #FAFAFA;
+    color: #1a1a1a;
+    font-family: 'Outfit', sans-serif;
+  }
+}
+
+@theme {
+  --font-serif: "Cormorant Garamond", serif;
+  --font-sans: "Outfit", sans-serif;
+  --color-brand-dark: #1a1a1a;
+  --color-brand-light: #6b7280;
+  --color-brand-accent: #C5A059;
+  --color-brand-accent-hover: #D4AF37;
+  --color-brand-bg: #FAFAFA;
+  --color-brand-divider: #e5e7eb;
+  --color-brand-champagne: #F1E8D9;
+  --color-brand-text: #1a1a1a;
+}
