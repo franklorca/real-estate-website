@@ -22,7 +22,7 @@ export const AuthProvider = ({ children }) => {
           name: session.user.name,
           email: session.user.email,
           role: session.user.role || "member",
-          membership_status: session.user.membership_status || "active",
+          membership_status: session.user.membership_status || "pending",
         });
       } else {
         // Fallback: check /api/users/me if token stored in localStorage

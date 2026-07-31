@@ -15,7 +15,7 @@ export async function getAuthSession(req) {
         email: session.user.email,
         name: session.user.name,
         role: session.user.role || "member",
-        membership_status: session.user.membership_status || "active",
+        membership_status: session.user.membership_status || "pending",
       };
     }
   } catch (err) {
@@ -40,7 +40,7 @@ export async function getAuthSession(req) {
               email: user.email,
               name: user.name,
               role: user.role || "member",
-              membership_status: user.membership_status || "active",
+              membership_status: user.membership_status || "pending",
             };
           }
         }

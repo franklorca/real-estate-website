@@ -51,7 +51,7 @@ export const auth = betterAuth({
       membership_status: {
         type: "string",
         required: false,
-        defaultValue: "active",
+        defaultValue: "pending",
       },
     },
   },
