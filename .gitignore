@@ -1,13 +1,17 @@
 # Ignore any file named .env in any folder
 **/.env
+**/.env.local
+**/.env*.local
 
 # Node modules
 node_modules/
 /server/node_modules/
 /client/node_modules/
+/luminousheaven/node_modules/
 
 # Build folders
 /client/dist/
+/luminousheaven/.next/
 
 # Log files
 npm-debug.log*
