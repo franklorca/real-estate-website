@@ -65,6 +65,7 @@ const PropertyCard = ({ property, onUnsave }) => {
             src={property.image}
             alt={property.title}
             fill
+            quality={90}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-cover transition-transform duration-1000 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-105"
             priority={false}

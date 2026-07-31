@@ -271,6 +271,7 @@ export default function PropertyDetailPage() {
                 src={galleryImages[0] || property.image}
                 alt={property.title}
                 fill
+                quality={95}
                 sizes="(max-width: 1024px) 100vw, 66vw"
                 className="object-cover transition-transform duration-1000 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-105"
                 priority
@@ -290,6 +291,7 @@ export default function PropertyDetailPage() {
                       src={galleryImages[1]}
                       alt={`${property.title} secondary`}
                       fill
+                      quality={95}
                       sizes="33vw"
                       className="object-cover transition-transform duration-1000 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-105"
                     />

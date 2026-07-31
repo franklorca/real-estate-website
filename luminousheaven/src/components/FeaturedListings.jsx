@@ -86,6 +86,7 @@ const FeaturedListings = () => {
                 src={heroProperty.image}
                 alt={heroProperty.title}
                 fill
+                quality={90}
                 sizes="(max-width: 1024px) 100vw, 66vw"
                 className="object-cover transition-transform duration-1000 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-105 opacity-90 group-hover:opacity-100"
                 priority

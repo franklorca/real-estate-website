@@ -16,6 +16,7 @@ const CTA = () => {
         src={backgroundImageUrl}
         alt="Luminous Heaven CTA"
         fill
+        quality={90}
         sizes="100vw"
         className="object-cover"
       />
