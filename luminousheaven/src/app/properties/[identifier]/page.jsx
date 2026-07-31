@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams, usePathname } from "next/navigation";
 import Image from "next/image";
 import api from "@/services/api";
 import AgentProfile from "@/components/AgentProfile";
@@ -10,6 +10,8 @@ import { generateSmartSlug, decodeId, isValidHashId } from "@/utils/slugify";
 import { fetchWithSWR } from "@/utils/cache";
 import { motion, AnimatePresence } from "framer-motion";
 import SEO from "@/components/SEO";
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "react-toastify";
 
 const StatIcon = ({ icon, label }) => (
   <div className="flex items-center text-gray-600">
@@ -86,7 +88,10 @@ export default function PropertyDetailPage() {
 
   const params = useParams();
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const identifier = params?.identifier;
+  const { refreshUser } = useAuth();
 
   let resolvedId = null;
   const isStrictlyNumeric = /^\d+$/.test(identifier);
@@ -104,6 +109,34 @@ export default function PropertyDetailPage() {
       resolvedId = legacyMatch[1];
     }
   }
+
+  // --- Payment Verification Callback on return from Stripe Checkout ---
+  useEffect(() => {
+    const sessionId = searchParams.get("session_id");
+    const isSuccess = searchParams.get("success") === "true";
+
+    if (isSuccess && sessionId) {
+      const verify = async () => {
+        try {
+          const res = await api.post("/api/stripe/verify-payment", {
+            sessionId,
+          });
+
+          if (res.data?.success) {
+            toast.success(
+              "Welcome to Luminous Heaven Membership! Agent details unlocked."
+            );
+            await refreshUser();
+          }
+        } catch (e) {
+          console.error("Payment verification failed:", e);
+        } finally {
+          router.replace(pathname);
+        }
+      };
+      verify();
+    }
+  }, [searchParams, pathname, router, refreshUser]);
 
   useEffect(() => {
     const fetchProperty = async () => {
@@ -450,6 +483,7 @@ export default function PropertyDetailPage() {
                 <AgentProfile
                   agentId={property.agent_id}
                   propertyId={property.id}
+                  propertyIdentifier={identifier}
                 />
               </div>
             </div>

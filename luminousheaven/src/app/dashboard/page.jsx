@@ -2,11 +2,13 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import api from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
 import PropertyCard from "@/components/PropertyCard";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "react-toastify";
 
 const MailIcon = () => (
   <svg
@@ -45,7 +47,40 @@ const StatusIcon = () => (
 export default function UserDashboardPage() {
   const [savedProperties, setSavedProperties] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
+  const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
+  const { user, refreshUser } = useAuth();
+
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  // --- Payment Verification Callback on return from Stripe ---
+  useEffect(() => {
+    const sessionId = searchParams.get("session_id");
+    const isSuccess = searchParams.get("success") === "true";
+
+    if (isSuccess && sessionId) {
+      const verify = async () => {
+        try {
+          const res = await api.post("/api/stripe/verify-payment", {
+            sessionId,
+          });
+
+          if (res.data?.success) {
+            toast.success(
+              "Welcome to Luminous Heaven Membership! Your access is active."
+            );
+            await refreshUser();
+          }
+        } catch (e) {
+          console.error("Dashboard Payment verification failed:", e);
+        } finally {
+          router.replace(pathname);
+        }
+      };
+      verify();
+    }
+  }, [searchParams, pathname, router, refreshUser]);
 
   useEffect(() => {
     const fetchSavedProperties = async () => {
@@ -65,6 +100,22 @@ export default function UserDashboardPage() {
     fetchSavedProperties();
   }, [user]);
 
+  const handleUpgradeCheckout = async () => {
+    setIsCheckoutLoading(true);
+    try {
+      const response = await api.post("/api/stripe/create-checkout-session", {});
+      if (response.data?.url) {
+        window.location.href = response.data.url;
+      } else {
+        toast.error("Could not initiate checkout.");
+        setIsCheckoutLoading(false);
+      }
+    } catch (e) {
+      toast.error(e.response?.data?.message || "Failed to start checkout.");
+      setIsCheckoutLoading(false);
+    }
+  };
+
   const handleUnsaveFromDashboard = (propertyId) => {
     setSavedProperties((prevProperties) =>
       prevProperties.filter((p) => p.id !== propertyId)
@@ -80,6 +131,8 @@ export default function UserDashboardPage() {
       </div>
     );
   }
+
+  const isActive = user.membership_status === "active";
 
   return (
     <div className="bg-brand-bg min-h-screen">
@@ -119,9 +172,7 @@ export default function UserDashboardPage() {
                       Status:{" "}
                       <span
                         className={`capitalize font-semibold ${
-                          user.membership_status === "active"
-                            ? "text-green-600"
-                            : "text-yellow-600"
+                          isActive ? "text-green-600" : "text-yellow-600"
                         }`}
                       >
                         {user.membership_status}
@@ -133,14 +184,22 @@ export default function UserDashboardPage() {
 
               <div className="bg-white p-6 rounded-lg shadow-sm border border-brand-divider">
                 <h3 className="text-xl font-semibold font-serif text-brand-dark">
-                  My Subscription
+                  Membership Status
                 </h3>
                 <p className="mt-2 text-sm text-brand-light">
-                  Manage your billing and membership details.
+                  {isActive
+                    ? "Your membership is active! Enjoy unlocked agent contact details and off-market viewing access."
+                    : "Unlock direct agent contacts and off-market dossiers for a one-time fee of $30 (save $20)."}
                 </p>
-                <button className="mt-4 w-full bg-brand-dark text-white px-5 py-2.5 rounded-md font-semibold hover:bg-brand-accent transition-colors text-xs uppercase tracking-wider">
-                  Manage Subscription
-                </button>
+                {!isActive && (
+                  <button
+                    onClick={handleUpgradeCheckout}
+                    disabled={isCheckoutLoading}
+                    className="mt-4 w-full bg-brand-accent text-white px-5 py-3 rounded-md font-semibold hover:bg-brand-dark transition-colors text-xs uppercase tracking-wider disabled:bg-gray-400"
+                  >
+                    {isCheckoutLoading ? "Redirecting..." : "Upgrade Membership — $30"}
+                  </button>
+                )}
               </div>
             </div>
           </aside>

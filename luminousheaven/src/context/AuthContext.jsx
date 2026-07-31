@@ -111,8 +111,21 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const refreshUser = async () => {
+    try {
+      const res = await api.get("/api/users/me");
+      if (res.data) {
+        setUser(res.data);
+      }
+    } catch (e) {
+      console.error("AuthContext refreshUser error:", e);
+    }
+  };
+
   const value = {
     user,
+    setUser,
+    refreshUser,
     isLoading: isLoading || sessionLoading,
     savedPropertyIds,
     saveProperty,
