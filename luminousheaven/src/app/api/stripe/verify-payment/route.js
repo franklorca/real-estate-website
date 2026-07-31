@@ -2,19 +2,14 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import db from "@/lib/db";
-import { getAuthSession } from "@/lib/api-auth";
+import { requireAuthUser } from "@/lib/api-auth";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export async function POST(req) {
   try {
-    const userSession = await getAuthSession(req);
-    if (!userSession?.user) {
-      return NextResponse.json(
-        { message: "Authentication required to verify payment." },
-        { status: 401 }
-      );
-    }
+    const { user, response } = await requireAuthUser(req);
+    if (response) return response;
 
     const { sessionId } = await req.json();
     if (!sessionId) {
@@ -35,7 +30,7 @@ export async function POST(req) {
     }
 
     if (session.payment_status === "paid") {
-      const email = userSession.user.email;
+      const email = user.email;
 
       // Transactionally update membership_status to 'active' in both tables
       await db.transaction(async (trx) => {

@@ -1,19 +1,14 @@
 // luminousheaven/src/app/api/stripe/create-checkout-session/route.js
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
-import { getAuthSession } from "@/lib/api-auth";
+import { requireAuthUser } from "@/lib/api-auth";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export async function POST(req) {
   try {
-    const userSession = await getAuthSession(req);
-    if (!userSession?.user) {
-      return NextResponse.json(
-        { message: "Authentication required to initiate checkout." },
-        { status: 401 }
-      );
-    }
+    const { user, response } = await requireAuthUser(req);
+    if (response) return response;
 
     const { propertyIdentifier } = await req.json().catch(() => ({}));
 
@@ -46,13 +41,13 @@ export async function POST(req) {
         },
       ],
       mode: "payment",
-      customer_email: userSession.user.email,
-      client_reference_id: userSession.user.id.toString(),
+      customer_email: user.email,
+      client_reference_id: user.id.toString(),
       success_url: successUrl,
       cancel_url: cancelUrl,
       metadata: {
-        userId: userSession.user.id.toString(),
-        userEmail: userSession.user.email,
+        userId: user.id.toString(),
+        userEmail: user.email,
         propertyIdentifier: propertyIdentifier || "",
       },
     });
