@@ -1,8 +1,7 @@
 // luminousheaven/src/app/layout.jsx
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import LayoutShell from "@/components/LayoutShell";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -40,9 +39,7 @@ export default function RootLayout({ children }) {
       </head>
       <body className="font-sans bg-brand-bg text-brand-dark antialiased min-h-screen flex flex-col justify-between">
         <AuthProvider>
-          <Navbar />
-          <main className="flex-grow">{children}</main>
-          <Footer />
+          <LayoutShell>{children}</LayoutShell>
           <ToastContainer
             position="bottom-right"
             autoClose={5000}
