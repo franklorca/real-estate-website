@@ -15,8 +15,24 @@ const AgentProfile = ({ agentId, propertyId, propertyIdentifier }) => {
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRedirectingCheckout, setIsRedirectingCheckout] = useState(false);
+  const [isFeeEnabled, setIsFeeEnabled] = useState(true);
 
   const isMember = user && user.membership_status === "active";
+  const isLocked = isFeeEnabled && !isMember;
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await api.get("/api/settings");
+        if (typeof response.data?.membership_fee_enabled === "boolean") {
+          setIsFeeEnabled(response.data.membership_fee_enabled);
+        }
+      } catch (error) {
+        console.error("Failed to fetch site settings:", error);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   useEffect(() => {
     if (!agentId) return;
@@ -95,8 +111,14 @@ const AgentProfile = ({ agentId, propertyId, propertyIdentifier }) => {
 
   return (
     <div className="relative">
-      {/* Blurred container when user is NOT an active member */}
-      <div className={!isMember ? "filter blur-md select-none pointer-events-none opacity-40 transition-all duration-500" : ""}>
+      {/* Blurred container when Membership Gate is locked */}
+      <div
+        className={
+          isLocked
+            ? "filter blur-md select-none pointer-events-none opacity-40 transition-all duration-500"
+            : "transition-all duration-500"
+        }
+      >
         <div className="flex items-center space-x-4">
           {agent.profile_picture_url ? (
             <div className="relative w-20 h-20 rounded-full overflow-hidden shadow-md border border-brand-divider">
@@ -114,14 +136,18 @@ const AgentProfile = ({ agentId, propertyId, propertyIdentifier }) => {
             </div>
           )}
           <div>
-            <h3 className="text-xl font-bold font-serif text-brand-dark">{agent.name}</h3>
-            <p className="text-sm font-sans text-brand-light">Luminous Heaven Realty</p>
-            {isMember && agent.phone && (
+            <h3 className="text-xl font-bold font-serif text-brand-dark">
+              {agent.name}
+            </h3>
+            <p className="text-sm font-sans text-brand-light">
+              Luminous Heaven Realty
+            </p>
+            {!isLocked && agent.phone && (
               <p className="text-xs font-sans text-brand-accent mt-1 font-semibold">
                 Direct Tel: {agent.phone}
               </p>
             )}
-            {isMember && agent.email && (
+            {!isLocked && agent.email && (
               <p className="text-xs font-sans text-brand-dark font-mono">
                 {agent.email}
               </p>
@@ -150,7 +176,7 @@ const AgentProfile = ({ agentId, propertyId, propertyIdentifier }) => {
             ></textarea>
             <button
               type="submit"
-              disabled={isSubmitting || !isMember}
+              disabled={isSubmitting || isLocked}
               className="w-full bg-brand-dark text-white py-3 rounded-lg font-semibold hover:bg-brand-accent transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed uppercase text-xs tracking-wider"
             >
               {isSubmitting ? "Sending..." : "Send Inquiry"}
@@ -159,8 +185,8 @@ const AgentProfile = ({ agentId, propertyId, propertyIdentifier }) => {
         </div>
       </div>
 
-      {/* Lock Overlay for Non-Active Members */}
-      {!isMember && (
+      {/* Lock Overlay for Non-Members when Membership Gate is Enabled */}
+      {isLocked && (
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 bg-white/80 backdrop-blur-md rounded-xl border border-brand-accent/30 shadow-2xl text-center">
           <div className="w-12 h-12 rounded-full bg-brand-accent/10 flex items-center justify-center text-brand-accent mb-4">
             <Lock className="w-6 h-6" />
